@@ -1,5 +1,10 @@
 <span style="display:none"></span><!-- because otherwise the entire panel seems to be blank -->
-<th-autoclassify-panel
+    <div ng-controller="ThErrorLineController">
+        <auto-classification-panel
+                        ctrl="ctrl" status="status" autoclassifyStatus="autoclassifyStatus">
+                        </auto-classification-panel>
+    </div>
+<!-- <th-autoclassify-panel
    th-job="job"
    logs-parsed="jobLogsAllParsed"
    has-logs="job_log_urls.length > 0"
@@ -7,4 +12,4 @@
    autoclassify-status="job.autoclassify_status"
    th-user="user"
    >
-</th-autoclassify-panel>
+</th-autoclassify-panel> -->
