@@ -1,67 +1,79 @@
 'use strict';
 const PropTypes = require('prop-types');
 
-const AutoclassifyToolbar = (props) => {
-    let statusText = null;
-    if (props.status === 'ready' && props.autoclassifyStatus === "cross_referenced") {
-        statusText = "Autoclassification pending";
-    } else if (props.status === 'ready' && props.autoclassifyStatus === "failed") {
-        statusText = "Autoclassification failed";
+const NavButton = props => (
+    <button className={props.class}
+            title={props.title}
+            onClick={props.buttonOnclick}>
+            {props.text}</button>
+);
+
+
+class AutoClassifyToolbar extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.buttonOnclick = this.buttonOnclick.bind(this);
     }
-    return (
-        <div className="navbar-right">
-            {statusText &&
-                <span>{statusText}</span>}
-
-            <NavButton
-                    class="btn btn-view-nav btn-sm nav-menu-btn"
-                    title="Pin job for bustage"
-                    onclick={props.ctrl.onPin}
-                    text="Bustage" />
-        </div>
-    );
-};
-
-const NavButton = (props) => {
-    const buttonOnclick = (event) => {
+    buttonOnclick(event) {
         event.preventDefault();
-        props.onclick();
+        console.log("boo");
+        this.props.onPin();
     };
-    return (
-        <button className={props.class}
-                title={props.title}
-                onClick={buttonOnclick}>
-                {props.text}</button>
-    );
+
+    render() {
+
+        let statusText = null;
+        if (this.props.status === 'ready' && this.props.autoClassifyStatus === "cross_referenced") {
+            statusText = "Autoclassification pending";
+        } else if (this.props.status === 'ready' && this.props.autoClassifyStatus === "failed") {
+            statusText = "Autoclassification failed";
+        }
+        console.log("onPin " + this.props.onPin);
+        return (
+            <div className="navbar-right">
+                {statusText &&
+                    <span>{statusText}</span>}
+
+                <NavButton
+                        class="btn btn-view-nav btn-sm nav-menu-btn"
+                        title="Pin job for bustage"
+                        buttonOnclick={this.buttonOnclick}
+                        text="Bustage" />
+            </div>
+        );
+    }
 };
 
-class FailureClassificationPanel extends React.Component {
+
+class AutoClassificationPanel extends React.Component {
     constructor(props) {
         super(props);
     }
     render() {
+        console.log("autoclassifystatus " + this.props.autoClassifyStatus);
         return (
             <div>
-                <AutoclassifyToolbar
-                                ctrl={this.props.ctrl} autoclassifyStatus={this.props.autoclassifyStatus}
+                <AutoClassifyToolbar
+                                onPin={this.props.onPin} autoClassifyStatus={this.props.autoClassifyStatus}
                                 status={this.props.status} />
             </div>
         );
     };
 }
 
-FailureClassificationPanel.PropTypes = {
+AutoClassificationPanel.PropTypes = {
     $injector: PropTypes.object,
-    ctrl: PropTypes.object,
-    autoclassifyStatus: PropTypes.string,
+    onPin: PropTypes.func,
+    autoClassifyStatus: PropTypes.string,
     status: PropTypes.string
 };
 
 module.exports = {
-    FailureClassificationPanel,
-    AutoclassifyToolbar,
+    AutoClassificationPanel,
+    AutoClassifyToolbar,
     NavButton
 };
 
-treeherder.directive('failureClassificationPanel', ['reactDirective', '$injector', (reactDirective, $injector) =>
-reactDirective(FailureClassificationPanel, undefined, {}, { $injector })]);
+treeherder.directive('autoClassificationPanel', ['reactDirective', '$injector', (reactDirective, $injector) =>
+reactDirective(AutoClassificationPanel, undefined, {}, { $injector })]);

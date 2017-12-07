@@ -1,8 +1,12 @@
 <span style="display:none"></span><!-- because otherwise the entire panel seems to be blank -->
     <div ng-controller="ThErrorLineController">
-        <auto-classification-panel
-                        ctrl="ctrl" status="status" autoclassifyStatus="autoclassifyStatus">
-                        </auto-classification-panel>
+        <div ng-controller="ThClassificationOptionController">
+            <div ng-controller="ThAutoclassifyPanelController as panel">
+                <auto-classification-panel
+                                onPin="panel.onPin" status="status" autoClassifyStatus="job.autoclassify_status">
+                                </auto-classification-panel>
+            </div>
+        </div>
     </div>
 <!-- <th-autoclassify-panel
    th-job="job"
