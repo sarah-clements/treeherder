@@ -2,6 +2,7 @@ import calendar
 import hashlib
 import logging
 import re
+import datetime
 
 import newrelic.agent
 import requests
@@ -123,3 +124,16 @@ def get_guid_root(guid):
 def to_timestamp(datestr):
     """Converts a date string to a UTC timestamp"""
     return calendar.timegm(parser.parse(datestr).utctimetuple())
+
+
+def _get_end_of_day(date):
+    new_date = datetime.datetime.strptime(date, '%Y-%m-%d') + datetime.timedelta(days=1, microseconds=-1)
+    return new_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+
+
+def _get_tree(param):
+    if param == 'trunk':
+        tree = ['mozilla-central', 'mozilla-inbound', 'autoland', 'fx-team']
+    else:
+        tree = [param]
+    return tree

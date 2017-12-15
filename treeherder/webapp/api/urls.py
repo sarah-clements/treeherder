@@ -2,7 +2,7 @@ import copy
 
 from django.conf.urls import (include,
                               url)
-from rest_framework import routers
+from rest_framework import (routers, generics)
 
 from treeherder.webapp.api import (auth,
                                    bug,
@@ -17,7 +17,8 @@ from treeherder.webapp.api import (auth,
                                    refdata,
                                    runnable_jobs,
                                    seta,
-                                   text_log_error)
+                                   text_log_error,
+                                   intermittents_view)
 
 # router for views that are bound to a project
 # i.e. all those views that don't involve reference data
@@ -133,4 +134,8 @@ urlpatterns = [
         include(project_bound_router.urls)),
     url(r'^',
         include(default_router.urls)),
+    url(r'^failures/$', intermittents_view.Failures.as_view()),
+    url(r'^failuresbybug/$', intermittents_view.FailuresByBug.as_view()),
+    url(r'^failurecount/$', intermittents_view.FailureCount.as_view()),
+
 ]

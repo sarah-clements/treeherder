@@ -3,7 +3,8 @@
 export PATH="${HOME}/firefox:${HOME}/python/bin:${PATH}"
 
 export BROKER_URL='amqp://guest:guest@localhost//'
-export DATABASE_URL='mysql://root@localhost/treeherder'
+# export DATABASE_URL='mysql://root@localhost/treeherder'
+export DATABASE_URL='mysql://sclements:pC05k147TBB7cIiR4QToJ7njk9iIlc@treeherder-prod-ro.cd3i3txkp6c6.us-east-1.rds.amazonaws.com/treeherder'
 export ELASTICSEARCH_URL='http://localhost:9200'
 export REDIS_URL='redis://localhost:6379'
 

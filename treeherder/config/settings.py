@@ -604,3 +604,35 @@ ELASTIC_SEARCH = {
     "url": env.str('ELASTICSEARCH_URL', default=""),
     "index_prefix": ""
 }
+
+OPTION_COLLECTION_HASH_MAP = {
+    'a65f90502b147d735d83fc27bf3b4083bf9150fe': 'aarch64-debug',
+    '801fd7ddf52d2ddebc8335efe3052a0e20224366': 'aarch64-opt',
+    'c8425e150308855e59e00b1f529e0bef43b572b4': 'addon',
+    'c234d061a379ef96c8e40596f8ef493af5314af6': 'arm-debug',
+    '0cc61e31c0f6a2e2bff834386ceb88a7ca0882a6': 'arm-opt',
+    '03abd064e50ec12b8c7309950268531d78c63f60': 'asan',
+    'Bdb480de655aa6ec75ca058c849c4faf3c0f75b1': 'cc',
+    '8935db61162866b964b2dfb27a95e48182010449': 'ccov',
+    '97a2256c4cc9a84329cbde762800487753d91f3f': 'cficlang',
+    '32faaecac742100f7753f0c1d0aa0add01b4046b': 'debug',
+    '531e7f974f8dab5d4d8dfe344a0219a5b1184d20': 'debug, memleak',
+    '3b5a9f7948a58d58bd432360863a719c95485504': 'desktop',
+    'c9de6d35af194bdec7d7f75d64458f95e49b5b6b': 'fips',
+    '0492e0df40077c04b1943dc1aadb32c659080fac': 'fuzz',
+    '6719c46a0a0a18abfb6c3dbce45c7ccd772b243d': 'gyp',
+    '2fcc822c2cc8ac794b432df7a6001cf23f179259': 'gyp-asan',
+    '90d1234d3f87505015c8a57c37b61238932ddba1': 'jsdcov',
+    'deac9e5cccb3c4286fe31dcf4b99377380178fb4': 'lsan',
+    '5821eb27d7b71c9078000da31a5a654c97e401b9': 'make',
+    '4d5f6adebece95f33d25a650f02ae6eb4e09dc0a': 'make32',
+    '385b6f0ce05cf9d3e4aff828c2e56e6b103a8f93': 'make64',
+    '29c92751940fa74e86240ff1ddf63efc33bd3516': 'memleak',
+    '80bf070ed02e1dea9b1ec749cde4afc018ddd212': 'nostylo',
+    '102210fe594ee9b33d82058545b1ed14f4c8206e': 'opt',
+    '6ec0143a31f706cb8a4213effe3dc7e5459dc91b': 'opt-cross',
+    'f69e1b00908837bf0550250abb1645014317e8ec': 'pgo',
+    '4c1be689e706c72f78fee66a14442685a77f48b2': 'stylo',
+    '0eb65a36194b763376e2b67910f711ba8b1d7aef': 'tsan',
+    'b3e3f9cf9598de3d05de9b008eff543ea23bdfaf': 'ubsan'
+}

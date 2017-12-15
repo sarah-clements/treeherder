@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+container {
+    justify-content: center;
+    margin: auto;
+}
+
+body {
+    text-align: center;
+    overflow-x: auto;  
+}
+
+.top-navbar {
+    background-color: #222;
+    height: 34px;
+    position: absolute;
+}
+
+.btn-navbar {
+    background-color: transparent;
+    border-color: #373d40;
+    color: lightgray;
+    border-radius: 0;
+    border-bottom: 0;
+    border-top: 0;
+    border-right: 0;
+}
+
+.navbar-link:hover {
+    color: #eba870;
+}
+
+.navbar-input {
+    position: relative;
+}
+
+h1, .subheader {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.subheader {
+    font-size: 1.5rem;
+    margin-bottom: 7px;
+}
+
+/* overriding bootstrap default input style */
+input {
+    padding: .4em 1em;
+    border: 1.5px solid rgb(206, 212, 218);
+    text-align: center;
+    outline: none;
+    border-radius: 3.5px;
+    vertical-align: middle
+}
+
+.hide {
+    visibility: hidden;
+}
+
+.small-text {
+    font-size: 12px;
+}
+
+.mg-chart-title {
+    font-size: 14px;
+}
+
+.dark-orange {
+    color: #dd6602;
+}
