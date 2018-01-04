@@ -9,7 +9,7 @@ class BugColumn extends React.Component {
         this.displayBugText = this.displayBugText.bind(this);
     }
 
-    displayBugText() {
+    displayBugText = () => {
         this.setState({ displayBugDetails: !this.state.displayBugDetails });
     };
 
