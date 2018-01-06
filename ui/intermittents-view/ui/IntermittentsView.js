@@ -3,22 +3,34 @@ import { connect } from 'react-redux';
 import { Container, Row, Col } from 'reactstrap';
 import Navigation from './Navigation';
 import GenericTable from './GenericTable';
-import TableControls from './TableControls';
 import { fetchBugData } from './../redux/actions';
 import PropTypes from 'prop-types';
+import DateRangePicker from './DateRangePicker';
+import moment from 'moment';
 
 export class IntermittentsView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
         from: null,
-        to: new Date(),
+        to: null,
     };
+    this.getDefaultDates = this.getDefaultDates.bind(this);
   }
 
 componentDidMount() {
-    // let url = `/bugs?${this.state.from}&${this.state.to}`;
-    this.props.fetchData('http://localhost:3000/bugs/');
+    this.getDefaultDates();
+}
+
+fetchBugData() {
+    let url = `http://localhost:3000/bugs?${this.state.from}&${this.state.to}`;
+    this.props.fetchData(url);
+}
+
+getDefaultDates() {
+    const to = moment().format("YYYY-MM-DD");
+    const from = moment().subtract(7, 'days').format("YYYY-MM-DD");
+    this.setState({ from, to }, () => this.fetchBugData());
 }
 
 render() {
@@ -30,9 +42,13 @@ render() {
                     <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Failures</h1></Col>
                 </Row>
                 <Row style={{ margin: 'auto' }}>
-                    <Col xs="12" className="mx-auto pb-6"><h2>From date1 to date2 UTC</h2></Col>
+                    <Col xs="12" className="mx-auto pb-6"><h2>{`From ${this.state.from} to ${this.state.to}`}</h2></Col>
                 </Row>
-            <TableControls />
+                <Row>
+                    <Col xs="12" className="mx-auto"><p>X failures in X pushes</p></Col>
+                </Row>
+                {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
+            <DateRangePicker defaultFrom={this.state.from} defaultTo={this.state.to} />
             {bugs && failureMessage === '' ?
                 <GenericTable bugs={bugs}/> : <p>{failureMessage}</p>}
         </Container>);

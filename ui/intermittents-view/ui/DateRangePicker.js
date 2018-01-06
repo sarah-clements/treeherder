@@ -1,7 +1,9 @@
 import React from 'react';
 import 'react-day-picker/lib/style.css';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
+import { parseDate, formatDate } from 'react-day-picker/moment';
 import { setTimeout } from 'timers';
+import moment from 'moment';
 
 export default class DateRangePicker extends React.Component {
     constructor(props) {
@@ -45,13 +47,15 @@ export default class DateRangePicker extends React.Component {
     render() {
         const today = new Date();
         const { from, to } = this.state;
+        const { defaultTo } = this.props;
         const modifiers = { start: from, end: to };
         return (
-            <div className="InputFromTo float-left">
+            <div className="InputFromTo row justify-content-center table-controls">
                 <DayPickerInput
                                 value={from}
-                                placeholder="From"
-                                format="LL"
+                                placeholder={moment().format("YYYY-MM-DD")}
+                                formatDate={formatDate}
+                                parseDate={parseDate}
                                 dayPickerProps={{
                                     selectedDays: [from, { from, to }],
                                     disabledDays: { after: today },
@@ -65,8 +69,9 @@ export default class DateRangePicker extends React.Component {
                     <DayPickerInput
                                 ref={element => (this.to = element)}
                                 value={to}
-                                placeholder="To"
-                                format="LL"
+                                placeholder={defaultTo}
+                                formatDate={formatDate}
+                                parseDate={parseDate}
                                 dayPickerProps={{
                                     selectedDays: [from, { from, to }],
                                     disabledDays: { after: today },

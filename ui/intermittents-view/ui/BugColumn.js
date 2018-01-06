@@ -9,7 +9,7 @@ class BugColumn extends React.Component {
         this.displayBugText = this.displayBugText.bind(this);
     }
 
-    displayBugText = () => {
+    displayBugText() {
         this.setState({ displayBugDetails: !this.state.displayBugDetails });
     };
 
@@ -17,12 +17,12 @@ class BugColumn extends React.Component {
         const { dataId } = this.props;
         const bugzillaBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=";
         return (
-            <td onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
-                {dataId}<span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
+            <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
+                <span className="text-primary">{dataId}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
                     {/* <a target="_blank" href={bugzillaBugUrl + dataId}>details</a> */}
                     <a className="ml-1" target="_blank" href={bugzillaBugUrl + dataId}>bugzilla</a>
                 </span>
-            </td>
+            </div>
         );
     }
 };
