@@ -3,7 +3,7 @@ import 'react-day-picker/lib/style.css';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import { parseDate, formatDate } from 'react-day-picker/moment';
 import { setTimeout } from 'timers';
-import moment from 'moment';
+import { Button } from 'reactstrap';
 
 export default class DateRangePicker extends React.Component {
     constructor(props) {
@@ -14,6 +14,7 @@ export default class DateRangePicker extends React.Component {
         };
         this.fromChange = this.fromChange.bind(this);
         this.toChange = this.toChange.bind(this);
+        this.updateData = this.updateData.bind(this);
     }
 
     componentWillUnmount() {
@@ -44,18 +45,23 @@ export default class DateRangePicker extends React.Component {
         this.setState({ to }, this.showFromMonth);
     }
 
+    updateData() {
+        console.log(this.state.from + " " + this.state.to);
+    }
+
     render() {
         const today = new Date();
         const { from, to } = this.state;
-        const { defaultTo } = this.props;
+        const { defaultTo, defaultFrom } = this.props;
         const modifiers = { start: from, end: to };
         return (
             <div className="InputFromTo row justify-content-center table-controls">
                 <DayPickerInput
                                 value={from}
-                                placeholder={moment().format("YYYY-MM-DD")}
+                                placeholder={defaultFrom}
                                 formatDate={formatDate}
                                 parseDate={parseDate}
+                                format="ddd MMM D, YYYY"
                                 dayPickerProps={{
                                     selectedDays: [from, { from, to }],
                                     disabledDays: { after: today },
@@ -72,6 +78,7 @@ export default class DateRangePicker extends React.Component {
                                 placeholder={defaultTo}
                                 formatDate={formatDate}
                                 parseDate={parseDate}
+                                format="ddd MMM D, YYYY"
                                 dayPickerProps={{
                                     selectedDays: [from, { from, to }],
                                     disabledDays: { after: today },
@@ -82,6 +89,7 @@ export default class DateRangePicker extends React.Component {
                                 }}
                                 onDayChange={this.toChange} />
                     </span>
+                    <Button color="secondary" className="ml-2" onClick={this.updateData}>Update</Button>
             </div>
         );
     }

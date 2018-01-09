@@ -52,13 +52,6 @@ input {
     border-radius: 3.5px;
 }
 
-/* .resolved-bug, .disabled-bug {
-    color:#aaa;
-}
-.resolved-bug {
-    text-decoration: line-through;
-} */
-
 .hidden {
     display: none;
 }
@@ -66,7 +59,3 @@ input {
 .small-text {
     font-size: 12px;
 }
-
-/* .rt-tr {
-    background-color: blue;
-} */
