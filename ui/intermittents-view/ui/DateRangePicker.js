@@ -1,11 +1,16 @@
 import React from 'react';
 import 'react-day-picker/lib/style.css';
+import { connect } from 'react-redux';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import { parseDate, formatDate } from 'react-day-picker/moment';
 import { setTimeout } from 'timers';
 import { Button } from 'reactstrap';
+import { formatDates, apiUrlFormatter } from '../constants';
+import { fetchBugData, updateDateRange } from './../redux/actions';
+// import IntermittentsView from './IntermittentsView';
+import moment from 'moment';
 
-export default class DateRangePicker extends React.Component {
+export class DateRangePicker extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -46,19 +51,21 @@ export default class DateRangePicker extends React.Component {
     }
 
     updateData() {
-        console.log(this.state.from + " " + this.state.to);
+        const [ISOto, to] = formatDates(moment(this.state.to), null);
+        const [ISOfrom, from] = formatDates(moment(this.state.from), null);
+        this.props.fetchData(apiUrlFormatter('bugs', ISOfrom, ISOto, 'tree'));
+        this.props.updateDates(from, to);
     }
 
     render() {
         const today = new Date();
         const { from, to } = this.state;
-        const { defaultTo, defaultFrom } = this.props;
         const modifiers = { start: from, end: to };
         return (
             <div className="InputFromTo row justify-content-center table-controls">
                 <DayPickerInput
                                 value={from}
-                                placeholder={defaultFrom}
+                                placeholder="From"
                                 formatDate={formatDate}
                                 parseDate={parseDate}
                                 format="ddd MMM D, YYYY"
@@ -75,7 +82,7 @@ export default class DateRangePicker extends React.Component {
                     <DayPickerInput
                                 ref={element => (this.to = element)}
                                 value={to}
-                                placeholder={defaultTo}
+                                placeholder="To"
                                 formatDate={formatDate}
                                 parseDate={parseDate}
                                 format="ddd MMM D, YYYY"
@@ -89,8 +96,15 @@ export default class DateRangePicker extends React.Component {
                                 }}
                                 onDayChange={this.toChange} />
                     </span>
-                    <Button color="secondary" className="ml-2" onClick={this.updateData}>Update</Button>
+                    <Button color="secondary" className="ml-2" onClick={this.updateData}>update</Button>
             </div>
         );
     }
 }
+
+const mapDispatchToProps = dispatch => ({
+    fetchData: url => dispatch(fetchBugData(url)),
+    updateDates: (from, to) => dispatch(updateDateRange(from, to))
+});
+
+export default connect(null, mapDispatchToProps)(DateRangePicker);
