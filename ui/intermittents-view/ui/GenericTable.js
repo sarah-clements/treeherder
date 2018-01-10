@@ -3,7 +3,6 @@ import { Table } from 'reactstrap';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import PropTypes from 'prop-types';
-import BugColumn from './BugColumn';
 const _ = require('lodash');
 
 class GenericTable extends React.Component {
@@ -11,10 +10,9 @@ class GenericTable extends React.Component {
         super(props);
         this.state = {
         };
-        this.bugStatus = this.bugStatus.bind(this);
     }
 
-    bugStatus(state, bug) {
+    bugRowStyling(state, bug) {
         if (bug) {
             let style = { color: '#aaa' };
 
@@ -32,56 +30,16 @@ class GenericTable extends React.Component {
     };
 
     render() {
-        let { bugs } = this.props;
+        let { bugs, columns, trStyling } = this.props;
+        //if dynamic table row styling based on bug status/whiteboard is not needed, pass the trStyling prop a false bool
         bugs = _.map(bugs);
-        const columns = [
-              {
-                Header: "BugID",
-                accessor: "id",
-                Cell: props => <BugColumn dataId={props.value}/>
-              },
-              {
-                Header: "Count",
-                accessor: "status",
-              },
-              {
-                Header: "Summary",
-                accessor: "summary",
-              },
-              {
-                Header: "Whiteboard",
-                accessor: "whiteboard",
-              }
-            ];
         return (
             <ReactTable
                         data={bugs}
                         columns={columns}
                         className="-striped"
-                        getTrProps={this.bugStatus}
+                        getTrProps={trStyling ? this.bugRowStyling : () => ({})}
                         />
-            // <div className="table-responsive-sm">
-            //     <Table bordered striped>
-            //         <thead>
-            //             <tr>
-            //                 <th>Bug ID</th>
-            //                 <th>Count</th>
-            //                 <th className="text-truncate">Summary</th>
-            //                 <th>Whiteboard</th>
-            //             </tr>
-            //         </thead>
-            //         <tbody>
-            //             {Object.entries(bugs).map((data, index) =>
-            //             <tr className={this.bugStatus(data[1])} key={index}>
-            //                 <BugColumn dataId={data[1].id} />
-            //                 {/* second category should be count*/}
-            //                 <td></td>
-            //                 <td className="text-left">{data[1].summary}</td>
-            //                 <td>{data[1].whiteboard}</td>
-            //             </tr>)}
-            //         </tbody>
-            // </Table>
-            // </div>
         );
     }
 };

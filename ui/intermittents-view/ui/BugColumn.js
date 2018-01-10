@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 class BugColumn extends React.Component {
     constructor(props) {
@@ -19,7 +20,7 @@ class BugColumn extends React.Component {
         return (
             <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
                 <span className="text-primary">{dataId}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
-                    {/* <a target="_blank" href={bugzillaBugUrl + dataId}>details</a> */}
+                    <Link to="/bugdetailsview">details</Link>
                     <a className="ml-1" target="_blank" href={bugzillaBugUrl + dataId}>bugzilla</a>
                 </span>
             </div>

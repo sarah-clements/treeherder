@@ -6,6 +6,7 @@ import GenericTable from './GenericTable';
 import { fetchBugData } from './../redux/actions';
 import PropTypes from 'prop-types';
 import DateRangePicker from './DateRangePicker';
+import BugColumn from './BugColumn';
 import { apiUrlFormatter } from '../constants';
 
 export class IntermittentsView extends React.Component {
@@ -16,13 +17,33 @@ export class IntermittentsView extends React.Component {
   }
 
 componentDidMount() {
-    let url = `http://localhost:3000/bugs?startday=${this.props.ISOfrom}&endday=${this.props.ISOto}&tree=trunk`;
+    let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, 'trunk');
     console.log(url);
-    this.props.fetchData(apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, 'trunk'));
+    this.props.fetchData(url);
 }
 
 render() {
     const { bugs, failureMessage, from, to } = this.props;
+    const columns = [
+        {
+          Header: "BugID",
+          accessor: "id",
+          Cell: props => <BugColumn dataId={props.value}/>
+        },
+        {
+          Header: "Count",
+          accessor: "status",
+        },
+        {
+          Header: "Summary",
+          accessor: "summary",
+        },
+        {
+          Header: "Whiteboard",
+          accessor: "whiteboard",
+        }
+      ];
+
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
             <Navigation />
@@ -38,7 +59,7 @@ render() {
                 {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
             <DateRangePicker />
             {bugs && failureMessage === '' ?
-                <GenericTable bugs={bugs}/> : <p>{failureMessage}</p>}
+                <GenericTable bugs={bugs} columns={columns} trStyling={true}/> : <p>{failureMessage}</p>}
         </Container>);
     }
 }
