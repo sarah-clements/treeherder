@@ -18,17 +18,17 @@ export class IntermittentsView extends React.Component {
 
 componentDidMount() {
     let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, 'trunk');
-    console.log(url);
     this.props.fetchData(url);
+    console.log(url);
 }
 
 render() {
     const { bugs, failureMessage, from, to } = this.props;
     const columns = [
         {
-          Header: "BugID",
+          Header: "Bug ID",
           accessor: "id",
-          Cell: props => <BugColumn dataId={props.value}/>
+          Cell: props => <BugColumn bugId={props.value}/>
         },
         {
           Header: "Count",
@@ -47,10 +47,10 @@ render() {
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
             <Navigation />
-                <Row style={{ margin: 'auto' }}>
+                <Row>
                     <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
                 </Row>
-                <Row style={{ margin: 'auto' }}>
+                <Row>
                     <Col xs="12" className="mx-auto pb-6"><h2>{`${from} to ${to}`}</h2></Col>
                 </Row>
                 <Row>
