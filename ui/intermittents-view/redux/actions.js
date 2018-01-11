@@ -16,8 +16,8 @@ export const fetchBugDataFailure = dataName => ({
     failureMessage: 'Oops, there was a problem retrieving the data. Please try again later.'
 });
 
-export const updateDateRange = (from, to) => ({
-    type: 'UPDATE_DATE_RANGE',
+export const updateDateRange = (from, to, stateName) => ({
+    type: `UPDATE_${stateName}_DATE_RANGE`,
     from,
     to
 });

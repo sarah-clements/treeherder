@@ -57,7 +57,7 @@ render() {
                     <Col xs="12" className="mx-auto pb-5"><p className="text-secondary">X failures in X pushes</p></Col>
                 </Row>
                 {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
-            <DateRangePicker />
+            <DateRangePicker stateName='BUGS'/>
             {bugs && failureMessage === '' ?
                 <GenericTable bugs={bugs} columns={columns} trStyling={true}/> : <p>{failureMessage}</p>}
         </Container>);

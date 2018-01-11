@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Container, Row, Col } from 'reactstrap';
 import Navigation from './Navigation';
-import { fetchBugData } from './../redux/actions';
+import { fetchBugData, updateDateRange } from './../redux/actions';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Icon from 'react-fontawesome';
@@ -17,6 +17,7 @@ export class BugDetailsView extends React.Component {
   }
 
 componentDidMount() {
+    this.props.updateDates(this.props.location.state.from, this.props.location.state.to, 'BUG_DETAILS');
     this.props.fetchData('http://localhost:3000/byBug', 'BUG_DETAILS_DATA');
 }
 
@@ -70,9 +71,12 @@ render() {
                     <Col xs="12" className="mx-auto"><h1>{`Details for Bug ${bugId}`}</h1></Col>
                 </Row>
                 <Row>
-                    <Col xs="12" className="mx-auto pb-5"><p className="subheader">{`${from} to ${to}`}</p></Col>
+                    <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
                 </Row>
-                <DateRangePicker />
+                <Row>
+                    <Col xs="12" className="mx-auto pb-5"><p className="text-secondary">X total failures</p></Col>
+                </Row>
+                <DateRangePicker stateName='BUG_DETAILS' />
                 {bugDetails && failureMessage === '' ?
                 <GenericTable bugs={bugDetails} columns={columns} trStyling={false}/> : <p>{failureMessage}</p>}
         </Container>);
@@ -86,12 +90,13 @@ Container.propTypes = {
 const mapStateToProps = state => ({
     bugDetails: state.bugDetailsData.data,
     failureMessage: state.bugDetailsData.failureMessage,
-    from: state.from,
-    to: state.to,
+    from: state.bugDetailsDates.from,
+    to: state.bugDetailsDates.to,
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: (url, dataName) => dispatch(fetchBugData(url, dataName))
+    fetchData: (url, dataName) => dispatch(fetchBugData(url, dataName)),
+    updateDates: (from, to, stateName) => dispatch(updateDateRange(from, to, stateName))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);

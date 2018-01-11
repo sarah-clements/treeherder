@@ -7,7 +7,6 @@ import { setTimeout } from 'timers';
 import { Button } from 'reactstrap';
 import { formatDates, apiUrlFormatter } from '../constants';
 import { fetchBugData, updateDateRange } from './../redux/actions';
-// import IntermittentsView from './IntermittentsView';
 import moment from 'moment';
 
 export class DateRangePicker extends React.Component {
@@ -54,13 +53,14 @@ export class DateRangePicker extends React.Component {
         const [ISOto, to] = formatDates(moment(this.state.to), null);
         const [ISOfrom, from] = formatDates(moment(this.state.from), null);
         this.props.fetchData(apiUrlFormatter('bugs', ISOfrom, ISOto, 'tree'));
-        this.props.updateDates(from, to);
+        this.props.updateDates(from, to, this.props.stateName);
     }
 
     render() {
         const today = new Date();
         const { from, to } = this.state;
         const modifiers = { start: from, end: to };
+
         return (
             <div className="InputFromTo row justify-content-center table-controls">
                 <DayPickerInput
@@ -104,7 +104,7 @@ export class DateRangePicker extends React.Component {
 
 const mapDispatchToProps = dispatch => ({
     fetchData: url => dispatch(fetchBugData(url)),
-    updateDates: (from, to) => dispatch(updateDateRange(from, to))
+    updateDates: (from, to, stateName) => dispatch(updateDateRange(from, to, stateName))
 });
 
 export default connect(null, mapDispatchToProps)(DateRangePicker);

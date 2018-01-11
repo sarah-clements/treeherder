@@ -6,6 +6,7 @@ const getInitialDates = (today) => {
     const [ISOfrom, from] = formatDates(today.subtract(7, 'days'), moment().subtract(7, 'days'));
     return { from, to, ISOfrom, ISOto };
 };
+
 export const fetchData = (dataName = '') => (state = { data: {}, failureMessage: '' }, action) => {
     switch (action.type) {
         // case 'REQUEST_BUGS_DATA':
@@ -28,9 +29,9 @@ export const fetchData = (dataName = '') => (state = { data: {}, failureMessage:
     };
 };
 
-export const updateDates = (state = getInitialDates(moment()), action) => {
+export const updateDates = (stateName = '') => (state = getInitialDates(moment()), action) => {
     switch (action.type) {
-        case 'UPDATE_DATE_RANGE':
+        case `UPDATE_${stateName}_DATE_RANGE`:
             return {
                 ...state,
                 from: action.from,
