@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Icon from 'react-fontawesome';
 import GenericTable from './GenericTable';
-// import { apiUrlFormatter } from '../constants';
+import DateRangePicker from './DateRangePicker';
 
 export class BugDetailsView extends React.Component {
   constructor(props) {
@@ -17,13 +17,12 @@ export class BugDetailsView extends React.Component {
   }
 
 componentDidMount() {
-    // let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, 'trunk');
-    // console.log("bugdetailview " + url);
-    // this.props.fetchData(url);
+    this.props.fetchData('http://localhost:3000/byBug', 'BUG_DETAILS_DATA');
 }
 
 render() {
-    const { from, to } = this.props;
+    const bugId = this.props.location.state.bugId;
+    const { from, to, bugDetails, failureMessage } = this.props;
     const columns = [
         {
             Header: "Start Time",
@@ -60,23 +59,22 @@ render() {
             Cell: <a href="" target="_blank">props.value</a>
         }
       ];
-    console.log(this.props.location.state.bugId);
 
     return (
-        <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
+        <Container fluid style={{ marginBottom: '.5rem', marginTop: '4.5rem', maxWidth: '1200px' }}>
             <Navigation />
                 <Row>
                     <Col xs="12"><span className="pull-left"><Icon name="arrow-left" className="pr-1"/><Link to="/intermittentsview.html">back</Link></span></Col>
                 </Row>
                 <Row>
-                    <Col xs="12" className="mx-auto pt-3"><h1>Details for Bug bugID</h1></Col>
+                    <Col xs="12" className="mx-auto"><h1>{`Details for Bug ${bugId}`}</h1></Col>
                 </Row>
                 <Row>
-                    <Col xs="12" className="mx-auto pb-5"><h2>{`${from} to ${to}`}</h2></Col>
+                    <Col xs="12" className="mx-auto pb-5"><p className="subheader">{`${from} to ${to}`}</p></Col>
                 </Row>
-                <GenericTable columns={columns} trStyling={false}/>
-            {/* {bugs && failureMessage === '' ?
-                <GenericTable bugs={bugs}/> : <p>{failureMessage}</p>} */}
+                <DateRangePicker />
+                {bugDetails && failureMessage === '' ?
+                <GenericTable bugs={bugDetails} columns={columns} trStyling={false}/> : <p>{failureMessage}</p>}
         </Container>);
     }
 }
@@ -86,14 +84,14 @@ Container.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    bugs: state.bugs,
-    failureMessage: state.failureMessage,
+    bugDetails: state.bugDetailsData.data,
+    failureMessage: state.bugDetailsData.failureMessage,
     from: state.from,
     to: state.to,
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: url => dispatch(fetchBugData(url))
+    fetchData: (url, dataName) => dispatch(fetchBugData(url, dataName))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);

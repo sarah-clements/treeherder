@@ -20,7 +20,7 @@ class BugColumn extends React.Component {
         return (
             <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
                 <span className="text-primary">{bugId}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
-                    <Link to={{ pathname: "/bugdetailsview", state: { bugId } }}>details</Link>
+                    <Link to={{ pathname: "/bugdetailsview", state: { bugId: bugId } }}>details</Link>
                     <a className="ml-1" target="_blank" href={bugzillaBugUrl + bugId}>bugzilla</a>
                 </span>
             </div>

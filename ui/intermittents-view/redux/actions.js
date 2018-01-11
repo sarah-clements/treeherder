@@ -6,13 +6,13 @@
 //     spinner: true
 // });
 
-export const fetchBugDataSuccess = json => ({
-    type: 'FETCH_BUGS_DATA_SUCCESS',
-    bugs: json
+export const fetchBugDataSuccess = (json, dataName) => ({
+    type: `FETCH_${dataName}_SUCCESS`,
+    data: json
 });
 
-export const fetchBugDataFailure = () => ({
-    type: 'FETCH_BUGS_DATA_FAILURE',
+export const fetchBugDataFailure = dataName => ({
+    type: `FETCH_${dataName}_FAILURE`,
     failureMessage: 'Oops, there was a problem retrieving the data. Please try again later.'
 });
 
@@ -22,14 +22,14 @@ export const updateDateRange = (from, to) => ({
     to
 });
 
-export const fetchBugData = url => dispatch => (
+export const fetchBugData = (url, dataName) => dispatch => (
     fetch(url).then(response => response.json())
     .then((json) => {
         console.log("fetchBugData success");
-        dispatch(fetchBugDataSuccess(json));
+        dispatch(fetchBugDataSuccess(json, dataName));
     })
     .catch((error) => {
         console.log("fetchBugData failed: " + error.failureMessage);
-        dispatch(fetchBugDataFailure());
+        dispatch(fetchBugDataFailure(dataName));
     })
 );

@@ -9,4 +9,10 @@ export const formatDates = (date, startday) => {
 };
 
 //TODO - replace path with treeherder url
-export const apiUrlFormatter = (api, startday, endday, tree) => `http://localhost:3000/${api}?startday=${startday}&endday=${endday}&tree=${tree}`;
+export const apiUrlFormatter = (api, startDay, endDay, tree, bugID) => {
+    let url = `http://localhost:3000/${api}?startday=${startDay}&endday=${endDay}&tree=${tree}`;
+    if (bugID) {
+        return url + `&bugid=${bugID}`;
+    }
+    return url;
+};

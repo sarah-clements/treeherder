@@ -1,8 +1,11 @@
 import { combineReducers } from 'redux';
-import bugsData from './table';
+import { fetchData, updateDates } from './table';
 
 const rootReducer = combineReducers({
-  bugs: bugsData
+  bugsData: fetchData('BUGS_DATA'),
+  bugDetailsData: fetchData('BUG_DETAILS_DATA'),
+  dates: updateDates,
+  // bugDetailsDates: updateDates
 });
 
 export default rootReducer;

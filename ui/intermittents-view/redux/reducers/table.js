@@ -1,34 +1,35 @@
 import moment from 'moment';
 import { formatDates } from '../../constants';
 
-// const initialState = {
-//     bugs: {},
-//     failureMessage: ''
-// };
-
-const getInitialState = (today) => {
+const getInitialDates = (today) => {
     const [ISOto, to] = formatDates(today, null);
     const [ISOfrom, from] = formatDates(today.subtract(7, 'days'), moment().subtract(7, 'days'));
-    return { from, to, ISOfrom, ISOto, bugs: {}, failureMessage: '' };
+    return { from, to, ISOfrom, ISOto };
 };
-
-const bugsData = (state = getInitialState(moment()), action) => {
+export const fetchData = (dataName = '') => (state = { data: {}, failureMessage: '' }, action) => {
     switch (action.type) {
         // case 'REQUEST_BUGS_DATA':
         //     return {
         //         ...state,
         //         spinner: true,
         //     }
-        case 'FETCH_BUGS_DATA_SUCCESS':
+        case `FETCH_${dataName}_SUCCESS`:
             return {
                 ...state,
-                bugs: action.bugs,
+                data: action.data,
             };
-        case 'FETCH_BUGS_DATA_FAILURE':
+        case `FETCH_${dataName}_FAILURE`:
             return {
                 ...state,
                 message: action.failureMssage,
             };
+    default:
+            return state;
+    };
+};
+
+export const updateDates = (state = getInitialDates(moment()), action) => {
+    switch (action.type) {
         case 'UPDATE_DATE_RANGE':
             return {
                 ...state,
@@ -39,5 +40,3 @@ const bugsData = (state = getInitialState(moment()), action) => {
             return state;
     };
 };
-
-export default bugsData;

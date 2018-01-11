@@ -18,8 +18,8 @@ export class IntermittentsView extends React.Component {
 
 componentDidMount() {
     let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, 'trunk');
-    this.props.fetchData(url);
-    console.log(url);
+    this.props.fetchData(url, 'BUGS_DATA');
+    // console.log(url);
 }
 
 render() {
@@ -51,10 +51,10 @@ render() {
                     <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
                 </Row>
                 <Row>
-                    <Col xs="12" className="mx-auto pb-6"><h2>{`${from} to ${to}`}</h2></Col>
+                    <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
                 </Row>
                 <Row>
-                    <Col xs="12" className="mx-auto pb-10"><p>X failures in X pushes</p></Col>
+                    <Col xs="12" className="mx-auto pb-5"><p className="text-secondary">X failures in X pushes</p></Col>
                 </Row>
                 {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
             <DateRangePicker />
@@ -69,16 +69,16 @@ Container.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    bugs: state.bugs,
-    failureMessage: state.failureMessage,
-    from: state.from,
-    to: state.to,
-    ISOfrom: state.ISOfrom,
-    ISOto: state.ISOto
+    bugs: state.bugsData.data,
+    failureMessage: state.bugsData.failureMessage,
+    from: state.dates.from,
+    to: state.dates.to,
+    ISOfrom: state.dates.ISOfrom,
+    ISOto: state.dates.ISOto
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: url => dispatch(fetchBugData(url))
+    fetchData: (url, dataName) => dispatch(fetchBugData(url, dataName))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(IntermittentsView);

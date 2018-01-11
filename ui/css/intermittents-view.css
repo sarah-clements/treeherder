@@ -34,9 +34,14 @@ body {
     position: relative;
 }
 
-h1, h2 {
+h1, .subheader {
     font-family: 'Open Sans', sans-serif;
     color: black;
+}
+
+.subheader {
+    font-size: 1.5rem;
+    margin-bottom: 7px;
 }
 
 .table-controls {
