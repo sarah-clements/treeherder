@@ -17,13 +17,12 @@ export class IntermittentsView extends React.Component {
   }
 
 componentDidMount() {
-    let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, 'trunk');
-    this.props.fetchData(url, 'BUGS_DATA');
-    // console.log(url);
+    let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, this.props.tree);
+    this.props.fetchData(url, 'BUGS');
 }
 
 render() {
-    const { bugs, failureMessage, from, to } = this.props;
+    const { bugs, failureMessage, from, to, ISOfrom, ISOto } = this.props;
     const columns = [
         {
           Header: "Bug ID",
@@ -46,18 +45,18 @@ render() {
 
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
-            <Navigation />
-                <Row>
-                    <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
-                </Row>
-                <Row>
-                    <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
-                </Row>
-                <Row>
-                    <Col xs="12" className="mx-auto pb-5"><p className="text-secondary">X failures in X pushes</p></Col>
-                </Row>
-                {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
-            <DateRangePicker stateName='BUGS'/>
+            <Navigation name="BUGS" ISOfrom={ISOfrom} ISOto={ISOto} endpoint="bugs"/>
+            <Row>
+                <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
+            </Row>
+            <Row>
+                <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
+            </Row>
+            <Row>
+                <Col xs="12" className="mx-auto pb-4"><p className="text-secondary">X failures in X pushes</p></Col>
+            </Row>
+            {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
+            <DateRangePicker name='BUGS'/>
             {bugs && failureMessage === '' ?
                 <GenericTable bugs={bugs} columns={columns} trStyling={true}/> : <p>{failureMessage}</p>}
         </Container>);
@@ -74,11 +73,12 @@ const mapStateToProps = state => ({
     from: state.dates.from,
     to: state.dates.to,
     ISOfrom: state.dates.ISOfrom,
-    ISOto: state.dates.ISOto
+    ISOto: state.dates.ISOto,
+    tree: state.mainTree.tree
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: (url, dataName) => dispatch(fetchBugData(url, dataName))
+    fetchData: (url, name) => dispatch(fetchBugData(url, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(IntermittentsView);

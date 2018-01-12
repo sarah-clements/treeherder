@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { updateTreeName, fetchBugData } from './../redux/actions';
 import {
     Collapse,
     Navbar,
@@ -8,13 +10,16 @@ import {
     DropdownToggle,
     DropdownMenu,
     DropdownItem } from 'reactstrap';
+import Icon from 'react-fontawesome';
+import { apiUrlFormatter } from '../constants';
 
-export default class Navigation extends React.Component {
+class Navigation extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = { isOpen: false,
-                        tree: 'trunk',
+                        trunk: true,
+                        autoland: false
                     };
 
         this.toggle = this.toggle.bind(this);
@@ -26,16 +31,26 @@ export default class Navigation extends React.Component {
     }
 
     changeTree(event) {
-        let tree = 'trunk';
+        const { autoland, trunk } = this.state;
+        let treeName = 'trunk';
+
         if (event.target.innerText === 'Autoland') {
-            tree = 'autoland';
+            treeName = 'autoland';
         }
-        if (this.state.tree !== tree) {
-            this.setState({ tree });
+        if (this.props.tree !== treeName) {
+            this.setState({ autoland: !autoland, trunk: !trunk }, () => this.updateData(treeName));
         }
     }
 
+    updateData(treeName) {
+        const { updateTree, fetchData, name, ISOfrom, ISOto, endpoint } = this.props;
+        let url = apiUrlFormatter(endpoint, ISOfrom, ISOto, treeName);
+        fetchData(url, name);
+        updateTree(treeName, name);
+    }
+
     render() {
+        const { trunk, autoland } = this.state;
         return (
             <Navbar expand fixed="top" className="top-navbar">
                 <span className="lightorange">Intermittents View </span>
@@ -47,10 +62,12 @@ export default class Navigation extends React.Component {
                         </DropdownToggle>
                         <DropdownMenu >
                             <DropdownItem onClick={this.changeTree}>
-                            Trunk (default)
+                                <Icon name="check ml-1" className={`pr-1 ${trunk ? "" : "hidden"}`}/>
+                                Trunk
                             </DropdownItem>
                             <DropdownItem onClick={this.changeTree}>
-                            Autoland
+                                <Icon name="check ml-1" className={`pr-1 ${autoland ? "" : "hidden"}`}/>
+                                Autoland
                             </DropdownItem>
                         </DropdownMenu>
                     </UncontrolledDropdown>
@@ -63,3 +80,14 @@ export default class Navigation extends React.Component {
 Nav.propTypes = {
     caret: PropTypes.bool,
 };
+
+const mapStateToProps = state => ({
+    tree: state.mainTree.tree
+});
+
+const mapDispatchToProps = dispatch => ({
+    updateTree: (tree, name) => dispatch(updateTreeName(tree, name)),
+    fetchData: (url, name) => dispatch(fetchBugData(url, name))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navigation);

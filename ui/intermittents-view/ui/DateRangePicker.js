@@ -53,7 +53,7 @@ export class DateRangePicker extends React.Component {
         const [ISOto, to] = formatDates(moment(this.state.to), null);
         const [ISOfrom, from] = formatDates(moment(this.state.from), null);
         this.props.fetchData(apiUrlFormatter('bugs', ISOfrom, ISOto, 'tree'));
-        this.props.updateDates(from, to, this.props.stateName);
+        this.props.updateDates(from, to, this.props.name);
     }
 
     render() {
@@ -62,7 +62,7 @@ export class DateRangePicker extends React.Component {
         const modifiers = { start: from, end: to };
 
         return (
-            <div className="InputFromTo row justify-content-center table-controls">
+            <div className="InputFromTo py-4">
                 <DayPickerInput
                                 value={from}
                                 placeholder="From"
@@ -95,7 +95,7 @@ export class DateRangePicker extends React.Component {
                                     numberOfMonths: 2
                                 }}
                                 onDayChange={this.toChange} />
-                    </span>
+                </span>
                     <Button color="secondary" className="ml-2" onClick={this.updateData}>update</Button>
             </div>
         );
@@ -104,7 +104,7 @@ export class DateRangePicker extends React.Component {
 
 const mapDispatchToProps = dispatch => ({
     fetchData: url => dispatch(fetchBugData(url)),
-    updateDates: (from, to, stateName) => dispatch(updateDateRange(from, to, stateName))
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name))
 });
 
 export default connect(null, mapDispatchToProps)(DateRangePicker);

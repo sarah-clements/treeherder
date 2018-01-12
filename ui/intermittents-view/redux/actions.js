@@ -1,4 +1,15 @@
-// import { format } from 'moment';
+
+export const fetchBugData = (url, name) => dispatch => (
+    fetch(url).then(response => response.json())
+    .then((json) => {
+        console.log("fetchBugData success");
+        dispatch(fetchBugDataSuccess(json, name));
+    })
+    .catch((error) => {
+        console.log("fetchBugData failed: " + error.failureMessage);
+        dispatch(fetchBugDataFailure(name));
+    })
+);
 
 //action creators
 // export const requestBugData = () => ({
@@ -6,30 +17,23 @@
 //     spinner: true
 // });
 
-export const fetchBugDataSuccess = (json, dataName) => ({
-    type: `FETCH_${dataName}_SUCCESS`,
+export const fetchBugDataSuccess = (json, name) => ({
+    type: `FETCH_${name}_SUCCESS`,
     data: json
 });
 
-export const fetchBugDataFailure = dataName => ({
-    type: `FETCH_${dataName}_FAILURE`,
+export const fetchBugDataFailure = name => ({
+    type: `FETCH_${name}_FAILURE`,
     failureMessage: 'Oops, there was a problem retrieving the data. Please try again later.'
 });
 
-export const updateDateRange = (from, to, stateName) => ({
-    type: `UPDATE_${stateName}_DATE_RANGE`,
+export const updateDateRange = (from, to, name) => ({
+    type: `UPDATE_${name}_DATE_RANGE`,
     from,
     to
 });
 
-export const fetchBugData = (url, dataName) => dispatch => (
-    fetch(url).then(response => response.json())
-    .then((json) => {
-        console.log("fetchBugData success");
-        dispatch(fetchBugDataSuccess(json, dataName));
-    })
-    .catch((error) => {
-        console.log("fetchBugData failed: " + error.failureMessage);
-        dispatch(fetchBugDataFailure(dataName));
-    })
-);
+export const updateTreeName = (tree, name) => ({
+    type: `UPDATE_${name}_VIEW_TREE`,
+    tree
+});

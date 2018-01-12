@@ -44,10 +44,6 @@ h1, .subheader {
     margin-bottom: 7px;
 }
 
-.table-controls {
-    padding: 25px 18px;
-}
-
 /* overriding bootstrap default input style */
 input {
     padding: .4em 1em;
@@ -58,7 +54,7 @@ input {
 }
 
 .hidden {
-    display: none;
+    visibility: hidden;
 }
 
 .small-text {

@@ -18,7 +18,7 @@ export class BugDetailsView extends React.Component {
 
 componentDidMount() {
     this.props.updateDates(this.props.location.state.from, this.props.location.state.to, 'BUG_DETAILS');
-    this.props.fetchData('http://localhost:3000/byBug', 'BUG_DETAILS_DATA');
+    this.props.fetchData('http://localhost:3000/byBug', 'BUG_DETAILS');
 }
 
 render() {
@@ -74,9 +74,13 @@ render() {
                     <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
                 </Row>
                 <Row>
-                    <Col xs="12" className="mx-auto pb-5"><p className="text-secondary">X total failures</p></Col>
+                    <Col xs="12" className="mx-auto pb-4"><p className="text-secondary">X total failures</p></Col>
                 </Row>
-                <DateRangePicker stateName='BUG_DETAILS' />
+                <Row>
+                    {/* <Col xs="3"></Col> */}
+                    <Col xs="12" className="px-0 pull-right"><DateRangePicker name='BUG_DETAILS' /></Col>
+                    {/* <Col xs="4" className="px-0 py-3"><Button color="secondary" className="pull-left">bug history</Button></Col> */}
+                </Row>
                 {bugDetails && failureMessage === '' ?
                 <GenericTable bugs={bugDetails} columns={columns} trStyling={false}/> : <p>{failureMessage}</p>}
         </Container>);
@@ -95,8 +99,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: (url, dataName) => dispatch(fetchBugData(url, dataName)),
-    updateDates: (from, to, stateName) => dispatch(updateDateRange(from, to, stateName))
+    fetchData: (url, name) => dispatch(fetchBugData(url, name)),
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);
