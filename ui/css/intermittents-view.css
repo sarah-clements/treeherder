@@ -47,10 +47,11 @@ h1, .subheader {
 /* overriding bootstrap default input style */
 input {
     padding: .4em 1em;
-    border: 1px solid rgb(206, 212, 218);
+    border: 1.5px solid rgb(206, 212, 218);
     text-align: center;
     outline: none;
     border-radius: 3.5px;
+    vertical-align: middle
 }
 
 .hidden {

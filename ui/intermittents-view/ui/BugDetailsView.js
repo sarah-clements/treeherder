@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Button } from 'reactstrap';
 import Navigation from './Navigation';
 import { fetchBugData, updateDateRange } from './../redux/actions';
 import PropTypes from 'prop-types';
@@ -77,9 +77,10 @@ render() {
                     <Col xs="12" className="mx-auto pb-4"><p className="text-secondary">X total failures</p></Col>
                 </Row>
                 <Row>
-                    {/* <Col xs="3"></Col> */}
-                    <Col xs="12" className="px-0 pull-right"><DateRangePicker name='BUG_DETAILS' /></Col>
-                    {/* <Col xs="4" className="px-0 py-3"><Button color="secondary" className="pull-left">bug history</Button></Col> */}
+                    <Col xs="12" className="px-0">
+                        <DateRangePicker name='BUG_DETAILS' />
+                        <Button color="secondary" className="ml-3 d-inline-block">bug history</Button>
+                    </Col>
                 </Row>
                 {bugDetails && failureMessage === '' ?
                 <GenericTable bugs={bugDetails} columns={columns} trStyling={false}/> : <p>{failureMessage}</p>}
