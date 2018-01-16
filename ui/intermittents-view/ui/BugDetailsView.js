@@ -8,22 +8,32 @@ import { Link } from 'react-router-dom';
 import Icon from 'react-fontawesome';
 import GenericTable from './GenericTable';
 import DateRangePicker from './DateRangePicker';
+import GraphsContainer from './GraphsContainer';
+import { calculateMetrics } from '../helpers';
+import { oranges } from '../constants';
 
 export class BugDetailsView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+        graphOneData: null,
+        graphTwoData: null,
+        totalOranges: 0,
+        totalRuns: 0
     };
-  }
+}
 
 componentDidMount() {
     this.props.updateDates(this.props.location.state.from, this.props.location.state.to, 'BUG_DETAILS');
     this.props.fetchData('http://localhost:3000/byBug', 'BUG_DETAILS');
+    this.setState(calculateMetrics(oranges));
 }
 
 render() {
     const bugId = this.props.location.state.bugId;
     const { from, to, bugDetails, failureMessage } = this.props;
+    const { graphOneData, graphTwoData } = this.state;
+
     const columns = [
         {
             Header: "Start Time",
@@ -59,7 +69,7 @@ render() {
             accessor: "buildtype",
             Cell: <a href="" target="_blank">props.value</a>
         }
-      ];
+    ];
 
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '4.5rem', maxWidth: '1200px' }}>
@@ -74,14 +84,19 @@ render() {
                     <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
                 </Row>
                 <Row>
-                    <Col xs="12" className="mx-auto pb-4"><p className="text-secondary">X total failures</p></Col>
+                    <Col xs="12" className="mx-auto"><p className="text-secondary">X total failures</p></Col>
                 </Row>
+
+                {graphOneData && graphTwoData &&
+                <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} />}
+
                 <Row>
                     <Col xs="12" className="px-0">
                         <DateRangePicker name='BUG_DETAILS' />
                         <Button color="secondary" className="ml-3 d-inline-block">bug history</Button>
                     </Col>
                 </Row>
+
                 {bugDetails && failureMessage === '' ?
                 <GenericTable bugs={bugDetails} columns={columns} trStyling={false}/> : <p>{failureMessage}</p>}
         </Container>);
