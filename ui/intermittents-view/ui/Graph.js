@@ -7,7 +7,7 @@ export default class Graph extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        target: "graphic"
+        target: this.props.specs.target
     };
     this.updateTarget = this.updateTarget.bind(this);
   }
@@ -17,22 +17,12 @@ shouldComponentUpdate(nextProps, nextState) {
 }
 
 componentDidUpdate() {
-    this.createGraphic(this.props.data);
+    this.props.specs.target = this.state.target;
+    this.createGraphic();
 }
 
-createGraphic(data) {
-    data = MG.convert.date(data, "date");
-    MG.data_graphic({
-        title: "Orange Count Per Push",
-        data: data,
-        width: 700,
-        height: 300,
-        right: 40,
-        color: "#dd6602",
-        target: this.state.target,
-        x_accessor: "date",
-        y_accessor: "value"
-    });
+createGraphic() {
+    MG.data_graphic(this.props.specs);
 };
 
 updateTarget(element) {
@@ -43,7 +33,9 @@ updateTarget(element) {
 
 render() {
     return (
-        <div className="mx-auto pb-4" ref={ ele => this.updateTarget(ele) }></div>
+        <div className="mx-auto pb-3" ref={ ele => this.updateTarget(ele) }>
+            {this.props.specs.legend && <div className="legend"></div>}
+        </div>
         );
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Button } from 'reactstrap';
 import Navigation from './Navigation';
 import GenericTable from './GenericTable';
 import { fetchBugData } from './../redux/actions';
@@ -9,7 +9,9 @@ import DateRangePicker from './DateRangePicker';
 import BugColumn from './BugColumn';
 import { apiUrlFormatter } from '../constants';
 import Graph from './Graph';
+import moment from 'moment';
 
+// graph test data
 const oranges = {
     "2017-12-28": {
        orangecount: 157,
@@ -49,10 +51,11 @@ export class IntermittentsView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        dateCounts: null,
-        dateTestRunCounts: null,
-        dateFreqs: null
+        graphOneData: null,
+        graphTwoData: null,
+        showGraphTwo: false
     };
+    this.toggleGraph = this.toggleGraph.bind(this);
   }
 
 componentDidMount() {
@@ -65,12 +68,15 @@ parseGraphData(data) {
     let dateCounts = [];
     let dateTestRunCounts = [];
     let dateFreqs = [];
+
     Object.entries(data).map((entry) => {
         let freqs = entry[1].testruns < 1 ? 0 : (entry[1].orangecount/entry[1].testruns);
-        [dateCounts, dateTestRunCounts, dateFreqs] = this.calculateMetric(entry[0], entry[1].orangecount,
+        let date = moment(entry[0]).toDate();
+        [dateCounts, dateTestRunCounts, dateFreqs] = this.calculateMetric(date, entry[1].orangecount,
             entry[1].testruns, freqs, dateCounts, dateTestRunCounts, dateFreqs);
     });
-    this.setState({ dateCounts, dateTestRunCounts, dateFreqs });
+
+    this.setState({ graphOneData: dateFreqs, graphTwoData: [dateCounts, dateTestRunCounts] });
 }
 
 calculateMetric(date, count, testruns, freq, dateCounts, dateTestRunCounts, dateFreqs) {
@@ -80,8 +86,14 @@ calculateMetric(date, count, testruns, freq, dateCounts, dateTestRunCounts, date
     return [dateCounts, dateTestRunCounts, dateFreqs];
 }
 
+toggleGraph() {
+    this.setState({ showGraphTwo: !this.state.showGraphTwo });
+}
+
 render() {
     const { bugs, failureMessage, from, to, ISOfrom, ISOto } = this.props;
+    const { graphOneData, graphTwoData, showGraphTwo } = this.state;
+
     const columns = [
         {
           Header: 'Bug ID',
@@ -101,7 +113,32 @@ render() {
           accessor: 'whiteboard',
         }
       ];
-    console.log(this.state.dateCounts, this.state.dateTestRunCounts);
+
+    const graphOneSpecs = {
+        title: "Orange Count per Push",
+        data: graphOneData,
+        width: 700,
+        height: 300,
+        right: 40,
+        color: "#dd6602",
+        target: "graphic",
+        x_accessor: "date",
+        y_accessor: "value",
+    };
+
+    const graphTwoSpecs = {
+        data: graphTwoData,
+        width: 700,
+        height: 300,
+        right: 40,
+        color: ["blue", "green"],
+        target: "graphic",
+        x_accessor: "date",
+        y_accessor: "value",
+        legend: ["Orange Count", "Push Count"],
+        legend_target: '.legend'
+    };
+
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
             <Navigation name='BUGS' ISOfrom={ISOfrom} ISOto={ISOto} endpoint='bugs'/>
@@ -114,10 +151,17 @@ render() {
             <Row>
                 <Col xs='12' className='mx-auto pb-5'><p className='text-secondary'>X failures in X pushes</p></Col>
             </Row>
+            {graphOneData &&
             <Row>
-                {this.state.dateFreqs &&
-                <Graph data={this.state.dateFreqs} />}
+                <Graph specs={graphOneSpecs} />
+            </Row>}
+            <Row>
+                <Button color="secondary" onClick={this.toggleGraph} className="mx-auto">{`show ${showGraphTwo ? "less" : "more"}`}</Button>
             </Row>
+            {showGraphTwo &&
+            <Row className="pt-5">
+                <Graph specs={graphTwoSpecs} />
+            </Row>}
             {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
             <DateRangePicker name='BUGS'/>
             {bugs && failureMessage === '' ?
