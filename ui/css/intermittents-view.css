@@ -36,7 +36,6 @@ body {
 
 h1, .subheader {
     font-family: 'Open Sans', sans-serif;
-    color: black;
 }
 
 .subheader {
@@ -60,4 +59,12 @@ input {
 
 .small-text {
     font-size: 12px;
+}
+
+.mg-chart-title {
+    font-size: 14px;
+}
+
+.dark-orange {
+    color: #dd6602;
 }

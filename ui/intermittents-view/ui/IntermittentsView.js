@@ -10,6 +10,7 @@ import BugColumn from './BugColumn';
 import { apiUrlFormatter } from '../constants';
 import Graph from './Graph';
 import moment from 'moment';
+import * as d3 from 'd3';
 
 // graph test data
 const oranges = {
@@ -120,10 +121,11 @@ render() {
         width: 700,
         height: 300,
         right: 40,
+        interpolate: d3.curveLinear,
         color: "#dd6602",
         target: "graphic",
         x_accessor: "date",
-        y_accessor: "value",
+        y_accessor: "value"
     };
 
     const graphTwoSpecs = {
@@ -131,6 +133,7 @@ render() {
         width: 700,
         height: 300,
         right: 40,
+        interpolate: d3.curveLinear,
         color: ["blue", "green"],
         target: "graphic",
         x_accessor: "date",

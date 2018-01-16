@@ -1,7 +1,6 @@
 import React from 'react';
 import MG from 'metrics-graphics';
 import 'metrics-graphics/dist/metricsgraphics.css';
-// import * as d3 from 'd3';
 
 export default class Graph extends React.Component {
   constructor(props) {
