@@ -7,10 +7,9 @@ import { fetchBugData } from './../redux/actions';
 import PropTypes from 'prop-types';
 import DateRangePicker from './DateRangePicker';
 import BugColumn from './BugColumn';
-import { apiUrlFormatter } from '../constants';
+import { apiUrlFormatter, calculateMetrics } from '../helpers';
+import { graphOneSpecs, graphTwoSpecs } from '../constants';
 import Graph from './Graph';
-import moment from 'moment';
-import * as d3 from 'd3';
 
 // graph test data
 const oranges = {
@@ -54,7 +53,9 @@ export class IntermittentsView extends React.Component {
     this.state = {
         graphOneData: null,
         graphTwoData: null,
-        showGraphTwo: false
+        showGraphTwo: false,
+        totalOranges: 0,
+        totalRuns: 0
     };
     this.toggleGraph = this.toggleGraph.bind(this);
   }
@@ -62,29 +63,7 @@ export class IntermittentsView extends React.Component {
 componentDidMount() {
     let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, this.props.tree);
     this.props.fetchData(url, 'BUGS');
-    this.parseGraphData(oranges);
-}
-
-parseGraphData(data) {
-    let dateCounts = [];
-    let dateTestRunCounts = [];
-    let dateFreqs = [];
-
-    Object.entries(data).map((entry) => {
-        let freqs = entry[1].testruns < 1 ? 0 : (entry[1].orangecount/entry[1].testruns);
-        let date = moment(entry[0]).toDate();
-        [dateCounts, dateTestRunCounts, dateFreqs] = this.calculateMetric(date, entry[1].orangecount,
-            entry[1].testruns, freqs, dateCounts, dateTestRunCounts, dateFreqs);
-    });
-
-    this.setState({ graphOneData: dateFreqs, graphTwoData: [dateCounts, dateTestRunCounts] });
-}
-
-calculateMetric(date, count, testruns, freq, dateCounts, dateTestRunCounts, dateFreqs) {
-    dateCounts.push({ date, value: count });
-    dateTestRunCounts.push({ date, value: testruns });
-    dateFreqs.push({ date, value: freq.toFixed(2) });
-    return [dateCounts, dateTestRunCounts, dateFreqs];
+    this.setState(calculateMetrics(oranges));
 }
 
 toggleGraph() {
@@ -93,8 +72,7 @@ toggleGraph() {
 
 render() {
     const { bugs, failureMessage, from, to, ISOfrom, ISOto } = this.props;
-    const { graphOneData, graphTwoData, showGraphTwo } = this.state;
-
+    const { graphOneData, graphTwoData, showGraphTwo, totalOranges, totalRuns } = this.state;
     const columns = [
         {
           Header: 'Bug ID',
@@ -115,33 +93,6 @@ render() {
         }
       ];
 
-    const graphOneSpecs = {
-        title: "Orange Count per Push",
-        data: graphOneData,
-        width: 700,
-        height: 300,
-        right: 40,
-        interpolate: d3.curveLinear,
-        color: "#dd6602",
-        target: "graphic",
-        x_accessor: "date",
-        y_accessor: "value"
-    };
-
-    const graphTwoSpecs = {
-        data: graphTwoData,
-        width: 700,
-        height: 300,
-        right: 40,
-        interpolate: d3.curveLinear,
-        color: ["blue", "green"],
-        target: "graphic",
-        x_accessor: "date",
-        y_accessor: "value",
-        legend: ["Orange Count", "Push Count"],
-        legend_target: '.legend'
-    };
-
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
             <Navigation name='BUGS' ISOfrom={ISOfrom} ISOto={ISOto} endpoint='bugs'/>
@@ -152,18 +103,18 @@ render() {
                 <Col xs='12' className='mx-auto'><p className='subheader'>{`${from} to ${to}`}</p></Col>
             </Row>
             <Row>
-                <Col xs='12' className='mx-auto pb-5'><p className='text-secondary'>X failures in X pushes</p></Col>
+                <Col xs='12' className='mx-auto pb-5'><p className='text-secondary'>{totalOranges} failures in {totalRuns} pushes</p></Col>
             </Row>
             {graphOneData &&
             <Row>
-                <Graph specs={graphOneSpecs} />
+                <Graph specs={graphOneSpecs} data={graphOneData}/>
             </Row>}
             <Row>
                 <Button color="secondary" onClick={this.toggleGraph} className="mx-auto">{`show ${showGraphTwo ? "less" : "more"}`}</Button>
             </Row>
             {showGraphTwo &&
             <Row className="pt-5">
-                <Graph specs={graphTwoSpecs} />
+                <Graph specs={graphTwoSpecs} data={graphTwoData}/>
             </Row>}
             {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
             <DateRangePicker name='BUGS'/>

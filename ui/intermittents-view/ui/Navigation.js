@@ -11,7 +11,7 @@ import {
     DropdownMenu,
     DropdownItem } from 'reactstrap';
 import Icon from 'react-fontawesome';
-import { apiUrlFormatter } from '../constants';
+import { apiUrlFormatter } from '../helpers';
 
 class Navigation extends React.Component {
     constructor(props) {

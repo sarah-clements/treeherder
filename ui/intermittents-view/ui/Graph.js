@@ -17,6 +17,7 @@ shouldComponentUpdate(nextProps, nextState) {
 
 componentDidUpdate() {
     this.props.specs.target = this.state.target;
+    this.props.specs.data = this.props.data;
     this.createGraphic();
 }
 

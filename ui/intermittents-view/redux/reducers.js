@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { formatDates } from '../constants';
+import { formatDates } from '../helpers';
 
 const getInitialDates = (today) => {
     const [ISOto, to] = formatDates(today, null);

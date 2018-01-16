@@ -5,7 +5,7 @@ import DayPickerInput from 'react-day-picker/DayPickerInput';
 import { parseDate, formatDate } from 'react-day-picker/moment';
 import { setTimeout } from 'timers';
 import { Button } from 'reactstrap';
-import { formatDates, apiUrlFormatter } from '../constants';
+import { formatDates, apiUrlFormatter } from '../helpers';
 import { fetchBugData, updateDateRange } from './../redux/actions';
 import moment from 'moment';
 

@@ -1,18 +1,29 @@
-export const formatDates = (date, startday) => {
-    const ISOdate = date.format("YYYY-MM-DD");
-    if (startday) {
-        date = startday;
-    };
-    const prettyDate = date.format("ddd MMM D, YYYY");
+import * as d3 from 'd3';
 
-    return [ISOdate, prettyDate];
+// make sure to pass the data as a prop to the graph & reset the data key/value to that data prop
+export const graphOneSpecs = {
+    title: "Orange Count per Push",
+    data: [],
+    width: 700,
+    height: 300,
+    right: 40,
+    interpolate: d3.curveLinear,
+    color: "#dd6602",
+    target: "graphic",
+    x_accessor: "date",
+    y_accessor: "value"
 };
 
-//TODO - replace path with treeherder url
-export const apiUrlFormatter = (api, startDay, endDay, tree, bugID) => {
-    let url = `http://localhost:3000/${api}?startday=${startDay}&endday=${endDay}&tree=${tree}`;
-    if (bugID) {
-        return url + `&bugid=${bugID}`;
-    }
-    return url;
+export const graphTwoSpecs = {
+    data: [],
+    width: 700,
+    height: 300,
+    right: 40,
+    interpolate: d3.curveLinear,
+    color: ["blue", "green"],
+    target: "graphic",
+    x_accessor: "date",
+    y_accessor: "value",
+    legend: ["Orange Count", "Push Count"],
+    legend_target: '.legend'
 };
