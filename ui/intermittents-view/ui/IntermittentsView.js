@@ -35,7 +35,7 @@ render() {
         {
           Header: 'Bug ID',
           accessor: 'id',
-          Cell: props => <BugColumn bugId={props.value}/>
+          Cell: props => <BugColumn data={props.original}/>
         },
         {
           Header: 'Count',
@@ -44,10 +44,13 @@ render() {
         {
           Header: 'Summary',
           accessor: 'summary',
+          minWidth: 250,
+          filterable: true
         },
         {
           Header: 'Whiteboard',
           accessor: 'whiteboard',
+          minWidth: 150
         }
       ];
 

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Row, Button } from 'reactstrap';
+import { Row, Button, Col } from 'reactstrap';
 import Graph from './Graph';
 import { graphOneSpecs, graphTwoSpecs } from '../constants';
+import DateOptions from './DateOptions';
 
 export default class GraphsContainer extends React.Component {
     constructor(props) {
@@ -17,7 +18,7 @@ export default class GraphsContainer extends React.Component {
     }
 
     render() {
-    const { graphOneData, graphTwoData } = this.props;
+    const { graphOneData, graphTwoData, dateOptions } = this.props;
     const { showGraphTwo } = this.state;
 
         return (
@@ -26,7 +27,11 @@ export default class GraphsContainer extends React.Component {
                 <Graph specs={graphOneSpecs} data={graphOneData}/>
             </Row>
             <Row>
-                <Button color="secondary" onClick={this.toggleGraph} className="mx-auto">{`show ${showGraphTwo ? "less" : "more"}`}</Button>
+                <Col xs="12" className="mx-auto">
+                    <Button color="secondary" onClick={this.toggleGraph} className="d-inline-block mr-3">{`show ${showGraphTwo ? "less" : "more"}`}</Button>
+                    {dateOptions &&
+                    <DateOptions />}
+                </Col>
             </Row>
             {showGraphTwo &&
             <Row className="pt-5">

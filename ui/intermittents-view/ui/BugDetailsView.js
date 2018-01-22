@@ -1,15 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col, Button } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
 import Navigation from './Navigation';
 import { fetchBugData, updateDateRange } from './../redux/actions';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Icon from 'react-fontawesome';
 import GenericTable from './GenericTable';
-import DateRangePicker from './DateRangePicker';
 import GraphsContainer from './GraphsContainer';
-import { calculateMetrics } from '../helpers';
+import { calculateMetrics, jobsUrl, logviewerUrl } from '../helpers';
 import { oranges } from '../constants';
 
 export class BugDetailsView extends React.Component {
@@ -30,7 +29,7 @@ componentDidMount() {
 }
 
 render() {
-    const bugId = this.props.location.state.bugId;
+    const { bugId, summary } = this.props.location.state;
     const { from, to, bugDetails, failureMessage } = this.props;
     const { graphOneData, graphTwoData } = this.state;
 
@@ -46,7 +45,7 @@ render() {
         {
             Header: "Revision",
             accessor: "revision",
-            Cell: <a href="" target="_blank">props.value</a>
+            Cell: props => <a href={jobsUrl(props.original.branch, props.value)} target="_blank">{props.value}</a>
         },
         {
             Header: "Platform",
@@ -67,10 +66,10 @@ render() {
         {
             Header: "Log",
             accessor: "buildtype",
-            Cell: <a href="" target="_blank">props.value</a>
+            // need to replace 0 with treeherder_id in logviewerUrl call
+            Cell: props => <a href={logviewerUrl(props.original.branch, 0)} target="_blank">view details</a>
         }
     ];
-
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '4.5rem', maxWidth: '1200px' }}>
             <Navigation />
@@ -84,18 +83,14 @@ render() {
                     <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
                 </Row>
                 <Row>
+                    <Col xs="4" className="mx-auto"><p className="text-secondary text-left">{summary}</p></Col>
+                </Row>
+                <Row>
                     <Col xs="12" className="mx-auto"><p className="text-secondary">X total failures</p></Col>
                 </Row>
 
                 {graphOneData && graphTwoData &&
-                <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} />}
-
-                <Row>
-                    <Col xs="12" className="px-0">
-                        <DateRangePicker name='BUG_DETAILS' />
-                        <Button color="secondary" className="ml-3 d-inline-block">bug history</Button>
-                    </Col>
-                </Row>
+                <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} dateOptions={true}/>}
 
                 {bugDetails && failureMessage === '' ?
                 <GenericTable bugs={bugDetails} columns={columns} trStyling={false}/> : <p>{failureMessage}</p>}

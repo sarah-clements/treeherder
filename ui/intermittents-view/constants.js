@@ -63,3 +63,5 @@ export const oranges = {
        testruns: 6,
     }
 };
+
+export const treeherderUrl = "https://treeherder.mozilla.org/";

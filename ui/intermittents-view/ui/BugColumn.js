@@ -16,13 +16,13 @@ class BugColumn extends React.Component {
     };
 
     render() {
-        const { bugId } = this.props;
+        const { id, summary } = this.props.data;
         const bugzillaBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=";
         return (
             <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
-                <span className="text-primary">{bugId}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
-                    <Link to={{ pathname: "/bugdetailsview", state: { bugId, from: this.props.from, to: this.props.to } }}>details</Link>
-                    <a className="ml-1" target="_blank" href={bugzillaBugUrl + bugId}>bugzilla</a>
+                <span className="text-primary">{id}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
+                    <Link to={{ pathname: "/bugdetailsview", state: { bugId: id, from: this.props.from, to: this.props.to, summary } }}>details</Link>
+                    <a className="ml-1" target="_blank" href={bugzillaBugUrl + id}>bugzilla</a>
                 </span>
             </div>
         );
