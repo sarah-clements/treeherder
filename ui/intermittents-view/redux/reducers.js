@@ -2,8 +2,8 @@ import moment from 'moment';
 import { formatDates } from '../helpers';
 
 const getInitialDates = (today) => {
-    const [ISOto, to] = formatDates(today, null);
-    const [ISOfrom, from] = formatDates(today.subtract(7, "days"), moment().subtract(7, "days"));
+    const [ISOto, to] = formatDates(today);
+    const [ISOfrom, from] = formatDates(today.subtract(7, "days"));
     return { from, to, ISOfrom, ISOto };
 };
 

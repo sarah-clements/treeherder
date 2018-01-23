@@ -50,9 +50,9 @@ export class DateRangePicker extends React.Component {
     }
 
     updateData() {
-        const [ISOto, to] = formatDates(moment(this.state.to), null);
-        const [ISOfrom, from] = formatDates(moment(this.state.from), null);
-        this.props.fetchData(apiUrlFormatter('bugs', ISOfrom, ISOto, 'tree'));
+        const [ISOto, to] = formatDates(moment(this.state.to));
+        const [ISOfrom, from] = formatDates(moment(this.state.from));
+        this.props.fetchData(apiUrlFormatter('bugs', ISOfrom, ISOto, 'tree'), this.props.name);
         this.props.updateDates(from, to, this.props.name);
     }
 
@@ -103,7 +103,7 @@ export class DateRangePicker extends React.Component {
 }
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: url => dispatch(fetchBugData(url)),
+    fetchData: url => dispatch(fetchBugData(url, name)),
     updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name))
 });
 

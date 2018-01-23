@@ -53,7 +53,6 @@ render() {
           minWidth: 150
         }
       ];
-
     return (
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
             <Navigation name='BUGS' ISOfrom={ISOfrom} ISOto={ISOto} endpoint='bugs'/>

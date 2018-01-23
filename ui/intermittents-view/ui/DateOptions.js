@@ -2,8 +2,12 @@ import React from 'react';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import Icon from 'react-fontawesome';
 import DateRangePicker from './DateRangePicker';
+import { formatDates, apiUrlFormatter } from '../helpers';
+import { connect } from 'react-redux';
+import { fetchBugData, updateDateRange } from './../redux/actions';
+import moment from 'moment';
 
-export default class DateOptions extends React.Component {
+class DateOptions extends React.Component {
     constructor(props) {
         super(props);
 
@@ -26,10 +30,30 @@ export default class DateOptions extends React.Component {
         const { rangeSelected } = this.state;
         const selectedText = event.target.innerText;
 
-        if (selectedText !== rangeSelected) {
+        // custom range is handled by the DateRangePicker component
+        if (selectedText !== rangeSelected && selectedText === "custom range") {
             this.setState({ rangeSelected: selectedText });
-            // this.setState({ rangeSelected: selectedText }, () => this.updateData(treeName));
+        } else if (selectedText !== rangeSelected) {
+            this.setState({ rangeSelected: selectedText }, () => this.updateData(selectedText));
         }
+    }
+
+    updateData(dateRange) {
+        const today = moment();
+        let from;
+        let ISOfrom;
+        if (dateRange === "last 7 days") {
+            from = 7;
+        } else if (dateRange === "last 30 days") {
+            from = 30;
+        } else {
+            // dateRange === "entire history" TBD
+            return;
+        }
+        const [ISOto, to] = formatDates(today);
+        [ISOfrom, from] = formatDates(today.subtract(from, "days"));
+        this.props.fetchData(apiUrlFormatter('bugs', ISOfrom, ISOto, 'tree'), "BUG_DETAILS");
+        this.props.updateDates(from, to, "BUG_DETAILS");
     }
 
     render() {
@@ -56,3 +80,10 @@ export default class DateOptions extends React.Component {
         );
     }
 }
+
+const mapDispatchToProps = dispatch => ({
+    fetchData: (url, name) => dispatch(fetchBugData(url, name)),
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name))
+});
+
+export default connect(null, mapDispatchToProps)(DateOptions);

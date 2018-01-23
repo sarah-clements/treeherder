@@ -1,11 +1,8 @@
 import moment from 'moment';
 import { treeherderUrl } from './constants';
 
-export const formatDates = (date, startday) => {
+export const formatDates = (date) => {
     const ISOdate = date.format("YYYY-MM-DD");
-    if (startday) {
-        date = startday;
-    };
     const prettyDate = date.format("ddd MMM D, YYYY");
     return [ISOdate, prettyDate];
 };
