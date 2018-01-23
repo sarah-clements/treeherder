@@ -1,23 +1,21 @@
-import React from 'react';
-import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-import Icon from 'react-fontawesome';
-import DateRangePicker from './DateRangePicker';
-import { formatDates, apiUrlFormatter } from '../helpers';
-import { connect } from 'react-redux';
-import { fetchBugData, updateDateRange } from './../redux/actions';
-import moment from 'moment';
+import React from "react";
+import { ButtonDropdown, DropdownToggle } from "reactstrap";
+import DateRangePicker from "./DateRangePicker";
+import { formatDates, apiUrlFormatter } from "../helpers";
+import { connect } from "react-redux";
+import { fetchBugData, updateDateRange } from "./../redux/actions";
+import moment from "moment";
+import DropdownMenuItems from './DropdownMenuItems';
 
 class DateOptions extends React.Component {
     constructor(props) {
         super(props);
-
-        this.toggle = this.toggle.bind(this);
         this.state = {
             dropdownOpen: false,
-            rangeSelected: ""
+            dateRange: ""
         };
         this.toggle = this.toggle.bind(this);
-        this.changeDateRange = this.changeDateRange.bind(this);
+        this.updateData = this.updateData.bind(this);
     }
 
     toggle() {
@@ -26,19 +24,9 @@ class DateOptions extends React.Component {
         });
     }
 
-    changeDateRange(event) {
-        const { rangeSelected } = this.state;
-        const selectedText = event.target.innerText;
-
-        // custom range is handled by the DateRangePicker component
-        if (selectedText !== rangeSelected && selectedText === "custom range") {
-            this.setState({ rangeSelected: selectedText });
-        } else if (selectedText !== rangeSelected) {
-            this.setState({ rangeSelected: selectedText }, () => this.updateData(selectedText));
-        }
-    }
-
     updateData(dateRange) {
+        this.setState({ dateRange });
+
         const today = moment();
         let from;
         let ISOfrom;
@@ -47,17 +35,17 @@ class DateOptions extends React.Component {
         } else if (dateRange === "last 30 days") {
             from = 30;
         } else {
-            // dateRange === "entire history" TBD
-            return;
+            // bug history (max 4 months) for initial query
+            from = 120;
         }
         const [ISOto, to] = formatDates(today);
         [ISOfrom, from] = formatDates(today.subtract(from, "days"));
-        this.props.fetchData(apiUrlFormatter('bugs', ISOfrom, ISOto, 'tree'), "BUG_DETAILS");
+        this.props.fetchData(apiUrlFormatter("bybug", ISOfrom, ISOto, "tree"), "BUG_DETAILS");
         this.props.updateDates(from, to, "BUG_DETAILS");
     }
 
     render() {
-        const { dropdownOpen, rangeSelected } = this.state;
+        const { dropdownOpen, dateRange } = this.state;
         const dateOptions = ["last 7 days", "last 30 days", "custom range", "entire history"];
 
         return (
@@ -66,16 +54,10 @@ class DateOptions extends React.Component {
                 <DropdownToggle caret>
                     date range
                 </DropdownToggle>
-                <DropdownMenu>
-                    {dateOptions.map((item, index) =>
-                    <DropdownItem key={index} onClick={this.changeDateRange}>
-                        <Icon name="check" className={`pr-1 ${rangeSelected === item ? "" : "hidden"}`}/>
-                        {item}
-                    </DropdownItem>)}
-                </DropdownMenu>
+                <DropdownMenuItems options={dateOptions} updateData={this.updateData} />
             </ButtonDropdown>
-        {rangeSelected === "custom range" &&
-        <DateRangePicker name='BUG_DETAILS' />}
+        {dateRange === "custom range" &&
+        <DateRangePicker name="BUG_DETAILS" />}
         </div>
         );
     }

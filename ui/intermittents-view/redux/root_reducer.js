@@ -6,7 +6,8 @@ const rootReducer = combineReducers({
   bugDetailsData: fetchData('BUG_DETAILS'),
   dates: updateDates('BUGS'),
   bugDetailsDates: updateDates('BUG_DETAILS'),
-  mainTree: updateTree('BUGS')
+  mainTree: updateTree('BUGS'),
+  bugDetailsTree: updateTree('BUG_DETAILS')
 });
 
 export default rootReducer;

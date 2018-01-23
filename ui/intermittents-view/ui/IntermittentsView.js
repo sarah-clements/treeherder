@@ -1,14 +1,14 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Container, Row, Col } from 'reactstrap';
-import Navigation from './Navigation';
-import GenericTable from './GenericTable';
-import { fetchBugData } from './../redux/actions';
-import PropTypes from 'prop-types';
-import BugColumn from './BugColumn';
-import { apiUrlFormatter, calculateMetrics } from '../helpers';
-import GraphsContainer from './GraphsContainer';
-import { oranges } from '../constants';
+import React from "react";
+import { connect } from "react-redux";
+import { Container, Row, Col } from "reactstrap";
+import Navigation from "./Navigation";
+import GenericTable from "./GenericTable";
+import { fetchBugData } from "./../redux/actions";
+import PropTypes from "prop-types";
+import BugColumn from "./BugColumn";
+import { apiUrlFormatter, calculateMetrics } from "../helpers";
+import GraphsContainer from "./GraphsContainer";
+import { oranges } from "../constants";
 
 export class IntermittentsView extends React.Component {
   constructor(props) {
@@ -22,54 +22,55 @@ export class IntermittentsView extends React.Component {
 }
 
 componentDidMount() {
-    let url = apiUrlFormatter('bugs', this.props.ISOfrom, this.props.ISOto, this.props.tree);
-    this.props.fetchData(url, 'BUGS');
+    const { fetchData, ISOfrom, ISOto, tree } = this.props;
+    let url = apiUrlFormatter("bugs", ISOfrom, ISOto, tree);
+    fetchData(url, "BUGS");
     this.setState(calculateMetrics(oranges));
 }
 
 render() {
-    const { bugs, failureMessage, from, to, ISOfrom, ISOto } = this.props;
+    const { bugs, failureMessage, from, to, ISOfrom, ISOto, tree } = this.props;
     const { graphOneData, graphTwoData, totalOranges, totalRuns } = this.state;
     const columns = [
         {
-          Header: 'Bug ID',
-          accessor: 'id',
+          Header: "Bug ID",
+          accessor: "id",
           Cell: props => <BugColumn data={props.original}/>
         },
         {
-          Header: 'Count',
-          accessor: 'status',
+          Header: "Count",
+          accessor: "status",
         },
         {
-          Header: 'Summary',
-          accessor: 'summary',
+          Header: "Summary",
+          accessor: "summary",
           minWidth: 250,
           filterable: true,
-          Filter: () => <input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }} placeholder="Search..."/>
+          Filter: () => <input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }} placeholder="Search summary..."/>
         },
         {
-          Header: 'Whiteboard',
-          accessor: 'whiteboard',
+          Header: "Whiteboard",
+          accessor: "whiteboard",
           minWidth: 150
         }
       ];
     return (
-        <Container fluid style={{ marginBottom: '.5rem', marginTop: '5rem', maxWidth: '1200px' }}>
-            <Navigation name='BUGS' ISOfrom={ISOfrom} ISOto={ISOto} endpoint='bugs'/>
+        <Container fluid style={{ marginBottom: ".5rem", marginTop: "5rem", maxWidth: "1200px" }}>
+            <Navigation name="BUGS" ISOfrom={ISOfrom} ISOto={ISOto} endpoint="bugs" tree={tree}/>
             <Row>
-                <Col xs='12' className='mx-auto pt-3'><h1>Intermittent Test Failures</h1></Col>
+                <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
             </Row>
             <Row>
-                <Col xs='12' className='mx-auto'><p className='subheader'>{`${from} to ${to}`}</p></Col>
+                <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
             </Row>
             <Row>
-                <Col xs='12' className='mx-auto'><p className='text-secondary'>{totalOranges} failures in {totalRuns} pushes</p></Col>
+                <Col xs="12" className="mx-auto"><p className="text-secondary">{totalOranges} failures in {totalRuns} pushes</p></Col>
             </Row>
 
             {graphOneData && graphTwoData &&
             <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} />}
 
-            {bugs && failureMessage === '' ?
+            {bugs && failureMessage === "" ?
                 <GenericTable bugs={bugs} columns={columns} trStyling={true}/> : <p>{failureMessage}</p>}
         </Container>);
     }

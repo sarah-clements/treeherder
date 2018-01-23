@@ -1,15 +1,15 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Container, Row, Col } from 'reactstrap';
-import Navigation from './Navigation';
-import { fetchBugData, updateDateRange } from './../redux/actions';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import Icon from 'react-fontawesome';
-import GenericTable from './GenericTable';
-import GraphsContainer from './GraphsContainer';
-import { calculateMetrics, jobsUrl, logviewerUrl } from '../helpers';
-import { oranges } from '../constants';
+import React from "react";
+import { connect } from "react-redux";
+import { Container, Row, Col } from "reactstrap";
+import Navigation from "./Navigation";
+import { fetchBugData, updateDateRange } from "./../redux/actions";
+import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import Icon from "react-fontawesome";
+import GenericTable from "./GenericTable";
+import GraphsContainer from "./GraphsContainer";
+import { calculateMetrics, jobsUrl, logviewerUrl, apiUrlFormatter } from "../helpers";
+import { oranges } from "../constants";
 
 export class BugDetailsView extends React.Component {
   constructor(props) {
@@ -23,14 +23,19 @@ export class BugDetailsView extends React.Component {
 }
 
 componentDidMount() {
-    this.props.updateDates(this.props.location.state.from, this.props.location.state.to, 'BUG_DETAILS');
-    this.props.fetchData('http://localhost:3000/byBug', 'BUG_DETAILS');
+    const { from, to } = this.props.location.state;
+    const { updateDates, fetchData, ISOfrom, ISOto, tree } = this.props;
+    updateDates(from, to, "BUG_DETAILS");
+
+    let url = apiUrlFormatter("byBug", ISOfrom, ISOto, tree);
+    fetchData(url, "BUG_DETAILS");
+
     this.setState(calculateMetrics(oranges));
 }
 
 render() {
     const { bugId, summary } = this.props.location.state;
-    const { from, to, bugDetails, failureMessage } = this.props;
+    const { from, to, ISOfrom, ISOto, bugDetails, failureMessage, tree } = this.props;
     const { graphOneData, graphTwoData } = this.state;
 
     const columns = [
@@ -71,8 +76,8 @@ render() {
         }
     ];
     return (
-        <Container fluid style={{ marginBottom: '.5rem', marginTop: '4.5rem', maxWidth: '1200px' }}>
-            <Navigation />
+        <Container fluid style={{ marginBottom: ".5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
+            <Navigation name="BUG_DETAILS" ISOfrom={ISOfrom} ISOto={ISOto} endpoint="bybugs" tree={tree}/>
                 <Row>
                     <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1"/>back</Link></span></Col>
                 </Row>
@@ -92,7 +97,7 @@ render() {
                 {graphOneData && graphTwoData &&
                 <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} dateOptions={true}/>}
 
-                {bugDetails && failureMessage === '' ?
+                {bugDetails && failureMessage === "" ?
                 <GenericTable bugs={bugDetails} columns={columns} trStyling={false}/> : <p>{failureMessage}</p>}
         </Container>);
     }
@@ -107,6 +112,9 @@ const mapStateToProps = state => ({
     failureMessage: state.bugDetailsData.failureMessage,
     from: state.bugDetailsDates.from,
     to: state.bugDetailsDates.to,
+    ISOfrom: state.bugDetailsDates.ISOfrom,
+    ISOto: state.bugDetailsDates.ISOto,
+    tree: state.bugDetailsTree.tree
 });
 
 const mapDispatchToProps = dispatch => ({
