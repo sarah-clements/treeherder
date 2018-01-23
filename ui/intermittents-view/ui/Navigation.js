@@ -18,8 +18,7 @@ class Navigation extends React.Component {
         super(props);
 
         this.state = { isOpen: false,
-                        trunk: true,
-                        autoland: false
+                        tree: "trunk"
                     };
 
         this.toggle = this.toggle.bind(this);
@@ -31,14 +30,11 @@ class Navigation extends React.Component {
     }
 
     changeTree(event) {
-        const { autoland, trunk } = this.state;
-        let treeName = 'trunk';
+        const { tree } = this.state;
+        const selectedText = event.target.innerText;
 
-        if (event.target.innerText === 'Autoland') {
-            treeName = 'autoland';
-        }
-        if (this.props.tree !== treeName) {
-            this.setState({ autoland: !autoland, trunk: !trunk }, () => this.updateData(treeName));
+        if (selectedText !== tree) {
+            this.setState({ tree: selectedText }, () => this.updateData(selectedText));
         }
     }
 
@@ -50,25 +46,23 @@ class Navigation extends React.Component {
     }
 
     render() {
-        const { trunk, autoland } = this.state;
+        const { tree, isOpen } = this.state;
+        const treeOptions = ["trunk", "autoland"];
         return (
             <Navbar expand fixed="top" className="top-navbar">
                 <span className="lightorange">Intermittents View </span>
-                <Collapse isOpen={this.state.isOpen} navbar>
+                <Collapse isOpen={isOpen} navbar>
                     <Nav navbar></Nav>
                     <UncontrolledDropdown>
                         <DropdownToggle className="btn-navbar navbar-link" nav caret>
                             Tree
                         </DropdownToggle>
                         <DropdownMenu >
-                            <DropdownItem onClick={this.changeTree}>
-                                <Icon name="check ml-1" className={`pr-1 ${trunk ? "" : "hidden"}`}/>
-                                Trunk
-                            </DropdownItem>
-                            <DropdownItem onClick={this.changeTree}>
-                                <Icon name="check ml-1" className={`pr-1 ${autoland ? "" : "hidden"}`}/>
-                                Autoland
-                            </DropdownItem>
+                            {treeOptions.map((item, index) =>
+                            <DropdownItem key={index} onClick={this.changeTree}>
+                                <Icon name="check" className={`pr-1 ${tree === item ? "" : "hidden"}`}/>
+                                {item}
+                            </DropdownItem>)}
                         </DropdownMenu>
                     </UncontrolledDropdown>
                 </Collapse>

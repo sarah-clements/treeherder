@@ -3,7 +3,7 @@ import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reac
 import Icon from 'react-fontawesome';
 import DateRangePicker from './DateRangePicker';
 
-export default class Example extends React.Component {
+export default class DateOptions extends React.Component {
     constructor(props) {
         super(props);
 
@@ -37,7 +37,7 @@ export default class Example extends React.Component {
         const dateOptions = ["last 7 days", "last 30 days", "custom range", "entire history"];
 
         return (
-        <div className="d-inline-block pb-5">
+        <div className="d-inline-block">
             <ButtonDropdown className="mr-3" isOpen={dropdownOpen} toggle={this.toggle}>
                 <DropdownToggle caret>
                     date range

@@ -3,6 +3,7 @@ import { Row, Button, Col } from 'reactstrap';
 import Graph from './Graph';
 import { graphOneSpecs, graphTwoSpecs } from '../constants';
 import DateOptions from './DateOptions';
+import DateRangePicker from './DateRangePicker';
 
 export default class GraphsContainer extends React.Component {
     constructor(props) {
@@ -27,10 +28,10 @@ export default class GraphsContainer extends React.Component {
                 <Graph specs={graphOneSpecs} data={graphOneData}/>
             </Row>
             <Row>
-                <Col xs="12" className="mx-auto">
-                    <Button color="secondary" onClick={this.toggleGraph} className="d-inline-block mr-3">{`show ${showGraphTwo ? "less" : "more"}`}</Button>
-                    {dateOptions &&
-                    <DateOptions />}
+                <Col xs="12" className="mx-auto pb-5">
+                    <Button color="secondary" onClick={this.toggleGraph} className="d-inline-block mr-3">{`${showGraphTwo ? "less" : "more"} graphs`}</Button>
+                    {dateOptions ?
+                    <DateOptions /> : <DateRangePicker name='BUGS'/>}
                 </Col>
             </Row>
             {showGraphTwo &&

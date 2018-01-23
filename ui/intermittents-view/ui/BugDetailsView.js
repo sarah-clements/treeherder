@@ -74,7 +74,7 @@ render() {
         <Container fluid style={{ marginBottom: '.5rem', marginTop: '4.5rem', maxWidth: '1200px' }}>
             <Navigation />
                 <Row>
-                    <Col xs="12"><span className="pull-left"><Icon name="arrow-left" className="pr-1"/><Link to="/intermittentsview.html">back</Link></span></Col>
+                    <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1"/>back</Link></span></Col>
                 </Row>
                 <Row>
                     <Col xs="12" className="mx-auto"><h1>{`Details for Bug ${bugId}`}</h1></Col>
@@ -83,7 +83,7 @@ render() {
                     <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
                 </Row>
                 <Row>
-                    <Col xs="4" className="mx-auto"><p className="text-secondary text-left">{summary}</p></Col>
+                    <Col xs="4" className="mx-auto"><p className="text-secondary text-center">{summary}</p></Col>
                 </Row>
                 <Row>
                     <Col xs="12" className="mx-auto"><p className="text-secondary">X total failures</p></Col>

@@ -62,7 +62,7 @@ export class DateRangePicker extends React.Component {
         const modifiers = { start: from, end: to };
 
         return (
-            <div className="InputFromTo py-5 d-inline-block">
+            <div className="InputFromTo d-inline-block">
                 <DayPickerInput
                                 value={from}
                                 placeholder="From"

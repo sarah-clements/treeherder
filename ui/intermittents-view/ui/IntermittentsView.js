@@ -5,7 +5,6 @@ import Navigation from './Navigation';
 import GenericTable from './GenericTable';
 import { fetchBugData } from './../redux/actions';
 import PropTypes from 'prop-types';
-import DateRangePicker from './DateRangePicker';
 import BugColumn from './BugColumn';
 import { apiUrlFormatter, calculateMetrics } from '../helpers';
 import GraphsContainer from './GraphsContainer';
@@ -45,7 +44,8 @@ render() {
           Header: 'Summary',
           accessor: 'summary',
           minWidth: 250,
-          filterable: true
+          filterable: true,
+          Filter: () => <input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }} placeholder="Search..."/>
         },
         {
           Header: 'Whiteboard',
@@ -69,9 +69,6 @@ render() {
 
             {graphOneData && graphTwoData &&
             <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} />}
-
-            {/* TODO: Set up manual/server side table sorting/pagination with redux*/}
-            <DateRangePicker name='BUGS'/>
 
             {bugs && failureMessage === '' ?
                 <GenericTable bugs={bugs} columns={columns} trStyling={true}/> : <p>{failureMessage}</p>}
