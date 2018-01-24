@@ -42,3 +42,10 @@ export const calculateMetrics = (data) => {
 
     return { graphOneData: dateFreqs, graphTwoData: [dateCounts, dateTestRunCounts], totalOranges, totalRuns };
 };
+
+export const urlParams = (search) => {
+    const params = new URLSearchParams(search);
+    const startday = params.get("startday");
+    const endday = params.get("endday");
+    return [startday, endday, params.get("tree")];
+};

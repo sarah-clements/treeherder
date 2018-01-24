@@ -3,12 +3,13 @@ import { connect } from "react-redux";
 import { Container, Row, Col } from "reactstrap";
 import Navigation from "./Navigation";
 import GenericTable from "./GenericTable";
-import { fetchBugData } from "./../redux/actions";
+import { fetchBugData, updateDateRange } from "./../redux/actions";
 import PropTypes from "prop-types";
 import BugColumn from "./BugColumn";
-import { apiUrlFormatter, calculateMetrics } from "../helpers";
+import { apiUrlFormatter, calculateMetrics, urlParams } from "../helpers";
 import GraphsContainer from "./GraphsContainer";
 import { oranges } from "../constants";
+const _ = require('lodash');
 
 export class IntermittentsView extends React.Component {
   constructor(props) {
@@ -22,9 +23,18 @@ export class IntermittentsView extends React.Component {
 }
 
 componentDidMount() {
-    const { fetchData, ISOfrom, ISOto, tree } = this.props;
-    let url = apiUrlFormatter("bugs", ISOfrom, ISOto, tree);
-    fetchData(url, "BUGS");
+    const { location, fetchData } = this.props;
+    let ISOfrom, ISOto, tree;
+
+    if (_.isEmpty(location.search)) {
+        ({ ISOfrom, ISOto, tree } = this.props);
+    } else {
+        //TODO: error handling if date range is longer than 4 months
+        [ISOfrom, ISOto, tree] = urlParams(location.search);
+        this.props.updateDates(ISOfrom, ISOto, "BUGS");
+    }
+
+    fetchData(apiUrlFormatter("bugs", ISOfrom, ISOto, tree), "BUGS");
     this.setState(calculateMetrics(oranges));
 }
 
@@ -55,7 +65,7 @@ render() {
         }
       ];
     return (
-        <Container fluid style={{ marginBottom: ".5rem", marginTop: "5rem", maxWidth: "1200px" }}>
+        <Container fluid style={{ marginBottom: "5rem", marginTop: "5rem", maxWidth: "1200px" }}>
             <Navigation name="BUGS" ISOfrom={ISOfrom} ISOto={ISOto} endpoint="bugs" tree={tree}/>
             <Row>
                 <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
@@ -91,7 +101,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: (url, name) => dispatch(fetchBugData(url, name))
+    fetchData: (url, name) => dispatch(fetchBugData(url, name)),
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(IntermittentsView);

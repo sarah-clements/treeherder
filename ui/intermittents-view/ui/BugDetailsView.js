@@ -80,7 +80,7 @@ render() {
         }
     ];
     return (
-        <Container fluid style={{ marginBottom: ".5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
+        <Container fluid style={{ marginBottom: "5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
             <Navigation name="BUG_DETAILS" ISOfrom={ISOfrom} ISOto={ISOto} endpoint="byBug" tree={tree}/>
                 <Row>
                     <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1"/>back</Link></span></Col>

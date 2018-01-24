@@ -11,6 +11,8 @@ const App = ({ store }) => (
             <main>
                 <Switch>
                     <Route exact path="/intermittentsview.html" component={IntermittentsView} />
+                    {/* <Route path="?startday=:startday&endday=:endday&tree=:tree" render={props => hasPropshasProps(props.location.search)} /> */}
+                    <Route path="?startday=:startday&endday=:endday&tree=:tree" component={IntermittentsView} />
                     <Route path="/bugdetailsview" component={BugDetailsView} />
                 </Switch>
             </main>
