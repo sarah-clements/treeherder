@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Container, Row, Col } from "reactstrap";
 import Navigation from "./Navigation";
-import { fetchBugData, updateDateRange } from "./../redux/actions";
+import { fetchBugData, updateDateRange, updateTreeName } from "./../redux/actions";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import Icon from "react-fontawesome";
@@ -20,24 +20,28 @@ export class BugDetailsView extends React.Component {
         totalOranges: 0,
         totalRuns: 0
     };
+    this.updateData = this.updateData.bind(this);
 }
 
 componentDidMount() {
-    const { from, to } = this.props.location.state;
-    const { updateDates, fetchData, ISOfrom, ISOto, tree } = this.props;
+    this.setState(calculateMetrics(oranges));
+    const { from, to, tree } = this.props.location.state;
+    const { updateDates, updateTree } = this.props;
+    updateTree(tree, "BUG_DETAILS");
     updateDates(from, to, "BUG_DETAILS");
+    this.updateData();
+}
 
+updateData() {
+    const { fetchData, ISOfrom, ISOto, tree } = this.props;
     let url = apiUrlFormatter("byBug", ISOfrom, ISOto, tree);
     fetchData(url, "BUG_DETAILS");
-
-    this.setState(calculateMetrics(oranges));
 }
 
 render() {
     const { bugId, summary } = this.props.location.state;
     const { from, to, ISOfrom, ISOto, bugDetails, failureMessage, tree } = this.props;
     const { graphOneData, graphTwoData } = this.state;
-
     const columns = [
         {
             Header: "Start Time",
@@ -77,7 +81,7 @@ render() {
     ];
     return (
         <Container fluid style={{ marginBottom: ".5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
-            <Navigation name="BUG_DETAILS" ISOfrom={ISOfrom} ISOto={ISOto} endpoint="bybugs" tree={tree}/>
+            <Navigation name="BUG_DETAILS" ISOfrom={ISOfrom} ISOto={ISOto} endpoint="byBug" tree={tree}/>
                 <Row>
                     <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1"/>back</Link></span></Col>
                 </Row>
@@ -119,7 +123,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
-    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name))
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
+    updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);

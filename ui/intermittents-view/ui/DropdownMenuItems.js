@@ -11,6 +11,12 @@ export default class DropdownMenuItems extends React.Component {
         this.changeSelection = this.changeSelection.bind(this);
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps) {
+            this.setState({ selectedItem: nextProps.default });
+        }
+    }
+
     changeSelection(event) {
         const { selectedItem } = this.state;
         const selectedText = event.target.innerText;
