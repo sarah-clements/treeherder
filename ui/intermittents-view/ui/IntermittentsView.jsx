@@ -66,7 +66,9 @@ render() {
       ];
     return (
         <Container fluid style={{ marginBottom: ".5rem", marginTop: "5rem", maxWidth: "1200px" }}>
-            <Navigation name="BUGS" ISOfrom={ISOfrom} ISOto={ISOto} api="failures" tree={tree} />
+            <Navigation tableName="BUGS" graphName="BUGS_GRAPHS" ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failures"
+                        graphApi="failurecount" tree={tree}
+            />
             <Row>
                 <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
             </Row>
@@ -78,7 +80,10 @@ render() {
             </Row>
 
             {graphOneData && graphTwoData &&
-            <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} tree={tree} name="BUGS" api="failures" />}
+            <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} tableName="BUGS" tree={tree}
+                             graphName="BUGS_GRAPHS" ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failures"
+                             graphApi="failurecount"
+            />}
 
             {bugs && tableFailureMessage === "" ?
                 <GenericTable bugs={bugs} columns={columns} trStyling /> : <p>{tableFailureMessage}</p>}

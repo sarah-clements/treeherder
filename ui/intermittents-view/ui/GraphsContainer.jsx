@@ -1,9 +1,9 @@
 import React from "react";
 import { Row, Button, Col } from "reactstrap";
 import Graph from "./Graph";
-import { graphOneSpecs, graphTwoSpecs } from "../constants";
 import DateOptions from "./DateOptions";
 import DateRangePicker from "./DateRangePicker";
+import { graphOneSpecs, graphTwoSpecs } from "../constants";
 
 export default class GraphsContainer extends React.Component {
     constructor(props) {
@@ -19,8 +19,9 @@ export default class GraphsContainer extends React.Component {
     }
 
     render() {
-    const { graphOneData, graphTwoData, dateOptions, name, tree, api, bugId } = this.props;
-    const { showGraphTwo } = this.state;
+
+        const { graphOneData, graphTwoData, dateOptions, name, tree, api, bugId } = this.props;
+        const { showGraphTwo } = this.state;
 
         return (
         <React.Fragment>

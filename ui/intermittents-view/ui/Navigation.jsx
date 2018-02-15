@@ -19,10 +19,11 @@ class Navigation extends React.Component {
         this.setState({ isOpen: !this.state.isOpen });
     }
 
+
     updateData(tree) {
-        const { fetchData, updateTree, name, ISOfrom, ISOto, api, bugId } = this.props;
-        let url = apiUrlFormatter(api, ISOfrom, ISOto, tree, bugId);
-        fetchData(url, name);
+        const { fetchData, updateTree, tableName, graphName, ISOfrom, ISOto, tableApi, graphApi, bugId } = this.props;
+        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), tableName);
+        fetchData(apiUrlFormatter(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
         updateTree(tree, name);
     }
 

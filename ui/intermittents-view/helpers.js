@@ -42,7 +42,6 @@ export const calculateMetrics = (data) => {
         dateTestRunCounts.push({ date, value: testRuns });
         dateFreqs.push({ date, value: freq });
     }
-    console.log(dateFreqs);
     return { graphOneData: dateFreqs, graphTwoData: [dateCounts, dateTestRunCounts], totalFailures, totalRuns };
 };
 

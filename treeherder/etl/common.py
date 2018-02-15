@@ -133,7 +133,11 @@ def _get_end_of_day(date):
 
 def _get_tree(param):
     if param == 'trunk':
-        tree = ['mozilla-central', 'mozilla-inbound', 'autoland', 'fx-team']
+        # the repository id's are used instead of name for query efficiency;
+        # trunk equals mozilla-central', 'mozilla-inbound', 'autoland', 'fx-team' (in sequence)
+        tree = (1, 2, 77, 14)
     else:
-        tree = [param]
+        tree = [77]
+
+    #     Todo set up a query to retrieve repo id based on name
     return tree

@@ -1,12 +1,9 @@
 
 export const fetchBugData = (url, name) => dispatch => (
     fetch(url).then(response => response.json())
-    .then((json) => {
-        console.log("fetchBugData success");
-        dispatch(fetchBugDataSuccess(json, name));
-    })
+    .then((json) => dispatch(fetchBugDataSuccess(json, name)))
     .catch((error) => {
-        console.log("fetchBugData failed: " + error.failureMessage);
+        console.log("fetchBugData failed: " + error);
         dispatch(fetchBugDataFailure(name));
     })
 );

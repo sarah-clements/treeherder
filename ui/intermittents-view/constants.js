@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-// make sure to pass the data as a prop to the graph & reset the data key/value to that data prop
+// data is passed as a prop and target is updated via a ref in graph.jsx
 export const graphOneSpecs = {
     title: "Orange Count per Push",
     data: [],
@@ -9,7 +9,7 @@ export const graphOneSpecs = {
     right: 40,
     interpolate: d3.curveLinear,
     color: "#dd6602",
-    target: "graphic",
+    target: "graph",
     x_accessor: "date",
     y_accessor: "value"
 };
@@ -21,7 +21,7 @@ export const graphTwoSpecs = {
     right: 40,
     interpolate: d3.curveLinear,
     color: ["blue", "green"],
-    target: "graphic",
+    target: "graph",
     x_accessor: "date",
     y_accessor: "value",
     legend: ["Orange Count", "Push Count"],

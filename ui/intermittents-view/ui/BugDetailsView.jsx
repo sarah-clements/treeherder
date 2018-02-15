@@ -82,7 +82,9 @@ render() {
     ];
     return (
         <Container fluid style={{ marginBottom: ".5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
-            <Navigation ISOfrom={ISOfrom} ISOto={ISOto} api="failuresbybug" dateOptions name="BUG_DETAILS" tree={tree} bugId={bugId} />
+            <Navigation ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failuresbybug" graphApi="failurecount"
+                        tableName="BUG_DETAILS" graphName="BUGS_DETAILS_GRAPHS" tree={tree} bugId={bugId} dateOptions
+            />
                 <Row>
                     <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1" />back</Link></span></Col>
                 </Row>

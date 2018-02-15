@@ -5,35 +5,34 @@ import "metrics-graphics/dist/metricsgraphics.css";
 export default class Graph extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-        target: this.props.specs.target
-    };
-    this.updateTarget = this.updateTarget.bind(this);
+
+    this.updateSpecs = this.updateSpecs.bind(this);
   }
 
-shouldComponentUpdate(nextProps, nextState) {
-    return nextState.target !== this.state.target;
-}
-
-componentDidUpdate() {
-    this.props.specs.target = this.state.target;
-    this.props.specs.data = this.props.data;
-    this.createGraphic();
+componentWillReceiveProps(nextProps) {
+    const { specs } = this.props;
+    if (specs.data !== nextProps.data) {
+        specs.data = nextProps.data;
+        this.createGraphic();
+    }
 }
 
 createGraphic() {
     MG.data_graphic(this.props.specs);
 }
 
-updateTarget(element) {
-    if (this.state.target) {
-        this.setState({ target: element });
+updateSpecs(element) {
+    if (element) {
+        const { specs, data } = this.props;
+        specs.target = element;
+        specs.data = data;
+        this.createGraphic();
     }
 }
 
 render() {
     return (
-        <div className="mx-auto pb-3" ref={ele => this.updateTarget(ele)}>
+        <div className="mx-auto pb-3" ref={ele => this.updateSpecs(ele)}>
             {this.props.specs.legend && <div className="legend" />}
         </div>
         );
