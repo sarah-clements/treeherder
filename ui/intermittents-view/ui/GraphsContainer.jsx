@@ -20,7 +20,7 @@ export default class GraphsContainer extends React.Component {
 
     render() {
 
-        const { graphOneData, graphTwoData, dateOptions, name, tree, api, bugId } = this.props;
+        const { graphOneData, graphTwoData, dateOptions, tableName, graphName, tree, bugId, tableApi, graphApi } = this.props;
         const { showGraphTwo } = this.state;
 
         return (
@@ -30,9 +30,14 @@ export default class GraphsContainer extends React.Component {
             </Row>
             <Row>
                 <Col xs="12" className="mx-auto pb-5">
-                    <Button color="secondary" onClick={this.toggleGraph} className="d-inline-block mr-3">{`${showGraphTwo ? "less" : "more"} graphs`}</Button>
+                    <Button color="secondary" onClick={this.toggleGraph} className="d-inline-block mr-3">
+                        {`${showGraphTwo ? "less" : "more"} graphs`}</Button>
                     {dateOptions ?
-                    <DateOptions name={name} tree={tree} api={api} bugId={bugId} /> : <DateRangePicker name={name} tree={tree} api={api} />}
+                    <DateOptions tableName={tableName} graphName={graphName} tree={tree} bugId={bugId} tableApi={tableApi}
+                             graphApi={graphApi}
+                    /> : <DateRangePicker tree={tree} tableApi={tableApi}
+                             graphApi={graphApi} tableName={tableName} graphName={graphName} bugId={bugId}
+                    />}
                 </Col>
             </Row>
             {showGraphTwo &&

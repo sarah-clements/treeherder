@@ -27,7 +27,6 @@ componentDidMount() {
     const { updateDates, updateTree } = this.props;
     updateTree(tree, "BUG_DETAILS");
     updateDates(from, to, "BUG_DETAILS");
-    this.updateData("failuresbybug", "BUG_DETAILS");
     this.updateData("failurecount", "BUGS_DETAILS_GRAPHS");
 }
 
@@ -48,6 +47,7 @@ render() {
     const { bugId, summary } = this.props.location.state;
     const { from, to, ISOfrom, ISOto, bugDetails, tableFailureMessage, tree } = this.props;
     const { graphOneData, graphTwoData } = this.state;
+    const totalCount = bugDetails ? bugDetails.results.length : 0;
     const columns = [
         {
             Header: "Push Time",
@@ -83,29 +83,34 @@ render() {
     return (
         <Container fluid style={{ marginBottom: ".5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
             <Navigation ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failuresbybug" graphApi="failurecount"
-                        tableName="BUG_DETAILS" graphName="BUGS_DETAILS_GRAPHS" tree={tree} bugId={bugId} dateOptions
+                        tableName="BUG_DETAILS" graphName="BUG_DETAILS_GRAPHS" tree={tree} bugId={bugId}
             />
-                <Row>
-                    <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1" />back</Link></span></Col>
-                </Row>
-                <Row>
-                    <Col xs="12" className="mx-auto"><h1>{`Details for Bug ${bugId}`}</h1></Col>
-                </Row>
-                <Row>
-                    <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
-                </Row>
-                <Row>
-                    <Col xs="4" className="mx-auto"><p className="text-secondary text-center">{summary}</p></Col>
-                </Row>
-                <Row>
-                    <Col xs="12" className="mx-auto"><p className="text-secondary">X total failures</p></Col>
-                </Row>
+            <Row>
+                <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1" />back</Link></span></Col>
+            </Row>
+            <Row>
+                <Col xs="12" className="mx-auto"><h1>{`Details for Bug ${bugId}`}</h1></Col>
+            </Row>
+            <Row>
+                <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to}`}</p></Col>
+            </Row>
+            <Row>
+                <Col xs="4" className="mx-auto"><p className="text-secondary text-center">{summary}</p></Col>
+            </Row>
+            <Row>
+                <Col xs="12" className="mx-auto"><p className="text-secondary">{totalCount} total failures</p></Col>
+            </Row>
 
-                {graphOneData && graphTwoData &&
-                <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} api="failuresbybug" dateOptions name="BUG_DETAILS" tree={tree} bugId={bugId} />}
+            {graphOneData && graphTwoData &&
+            <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} tableName="BUG_DETAILS" tree={tree}
+                             graphName="BUG_DETAILS_GRAPHS" ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failuresbybug"
+                             graphApi="failurecount" bugId={bugId} dateOptions
+            />}
 
-                {bugDetails && tableFailureMessage === "" ?
-                <GenericTable bugs={bugDetails} columns={columns} trStyling /> : <p>{tableFailureMessage}</p>}
+            {!tableFailureMessage && bugDetails ?
+            <GenericTable bugs={bugDetails.results} columns={columns} tableName="BUG_DETAILS" tableApi="failuresbybug" ISOfrom={ISOfrom}
+                          ISOto={ISOto} tree={tree} totalPages={bugDetails.total_pages} bugId={bugId}
+            /> : <p>{tableFailureMessage}</p>}
         </Container>);
     }
 }
@@ -115,7 +120,7 @@ Container.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    bugDetails: state.bugDetailsData.data.results,
+    bugDetails: state.bugDetailsData.data,
     graphs: state.bugDetailsGraphData.data,
     tableFailureMessage: state.bugDetailsData.failureMessage,
     graphsFailureMessage: state.bugDetailsGraphData.failureMessage,

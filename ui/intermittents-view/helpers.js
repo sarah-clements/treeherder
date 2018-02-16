@@ -1,5 +1,4 @@
 import moment from "moment";
-import { treeherderUrl } from "./constants";
 
 export const formatDates = (date) => {
     const ISOdate = date.format("YYYY-MM-DD");
@@ -8,18 +7,28 @@ export const formatDates = (date) => {
 };
 
 //TODO - replace localhost path with SERVICE_DOMAIN
-export const apiUrlFormatter = (path, startDay, endDay, tree, bugId) => {
+export const apiUrlFormatter = (path, startDay, endDay, tree, bugId, page, search) => {
     let url = `http://localhost:8000/api/${path}/?startday=${startDay}&endday=${endDay}&tree=${tree}`;
 
     if (bugId) {
         url += `&bug=${bugId}`;
     }
+
+    if (page) {
+        url += `&page=${page}`;
+    }
+
+    if (search) {
+        url += `&search=${search}`;
+    }
+
     return url;
 };
 
-export const logviewerUrl = (tree, treeherderId) => `${treeherderUrl}logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
+//TODO - replace localhost path with SERVICE_DOMAIN
+export const logviewerUrl = (tree, treeherderId) => `logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
 
-export const jobsUrl = (tree, revision) => `${treeherderUrl}#/jobs?repo=${tree}&revision=${revision}`;
+export const jobsUrl = (tree, revision) => `#/jobs?repo=${tree}&revision=${revision}`;
 
 export const calculateMetrics = (data) => {
     let dateCounts = [];

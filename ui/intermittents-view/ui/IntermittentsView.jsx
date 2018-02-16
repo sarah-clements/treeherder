@@ -22,7 +22,6 @@ class IntermittentsView extends React.Component {
 }
 
 componentDidMount() {
-    this.updateData("failures", "BUGS");
     this.updateData("failurecount", "BUGS_GRAPHS");
 }
 
@@ -56,7 +55,7 @@ render() {
           accessor: "summary",
           minWidth: 250,
           filterable: true,
-          Filter: () => <input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }} placeholder="Search summary..." />
+          // Filter: () => <input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }} placeholder="Search summary..." />
         },
         {
           Header: "Whiteboard",
@@ -84,9 +83,10 @@ render() {
                              graphName="BUGS_GRAPHS" ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failures"
                              graphApi="failurecount"
             />}
-
-            {bugs && tableFailureMessage === "" ?
-                <GenericTable bugs={bugs} columns={columns} trStyling /> : <p>{tableFailureMessage}</p>}
+            {!tableFailureMessage && bugs ?
+            <GenericTable bugs={bugs.results} columns={columns} tableName="BUGS" tableApi="failures" ISOfrom={ISOfrom}
+                          ISOto={ISOto} tree={tree} totalPages={bugs.total_pages}trStyling
+            /> : <p>{tableFailureMessage}</p>}
         </Container>);
     }
 }
@@ -96,7 +96,7 @@ Container.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    bugs: state.bugsData.data.results,
+    bugs: state.bugsData.data,
     graphs: state.bugsGraphData.data,
     tableFailureMessage: state.bugsData.failureMessage,
     graphsFailureMessage: state.bugsGraphData.failureMessage,
