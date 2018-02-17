@@ -28,7 +28,7 @@ export const apiUrlFormatter = (path, startDay, endDay, tree, bugId, page, searc
 //TODO - replace localhost path with SERVICE_DOMAIN
 export const logviewerUrl = (tree, treeherderId) => `logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
 
-export const jobsUrl = (tree, revision) => `#/jobs?repo=${tree}&revision=${revision}`;
+export const jobsUrl = (tree, revision) => `localhost:8000/#/jobs?repo=${tree}&revision=${revision}`;
 
 export const calculateMetrics = (data) => {
     let dateCounts = [];
@@ -40,8 +40,8 @@ export const calculateMetrics = (data) => {
     for (var i = 0; i < data.length; i++) {
         let failures = data[i].failure_count;
         let testRuns = data[i].test_runs;
-        let freq = testRuns < 1 ? 0 : Math.round(failures/testRuns);
-        // let freq = testRuns < 1 ? 0 : (failures/testRuns).toFixed(2);
+        let freq = testRuns < 1 || failures < 1 ? 0 : Math.round(failures/testRuns);
+        // let freq = testRuns < 1 ? 0 : ().toFixed(2);
         // need to convert a date to Date object because metrics graphics only accepts JS Date objects
         let date = moment(data[i].date).toDate();
 

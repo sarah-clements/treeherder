@@ -21,7 +21,7 @@ export const fetchBugDataSuccess = (data, name) => ({
 
 export const fetchBugDataFailure = name => ({
     type: `FETCH_${name}_FAILURE`,
-    failureMessage: "Oops, there was a problem retrieving the data. Please try again later."
+    message: "Oops, there was a problem retrieving the data. Please try again later."
 });
 
 export const updateDateRange = (from, to, name) => ({

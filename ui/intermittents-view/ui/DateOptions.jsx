@@ -16,6 +16,7 @@ class DateOptions extends React.Component {
         };
         this.toggle = this.toggle.bind(this);
         this.updateData = this.updateData.bind(this);
+        this.updateDateRange = this.updateDateRange.bind(this);
     }
 
     toggle() {
@@ -43,16 +44,16 @@ class DateOptions extends React.Component {
 
     updateData(fromDate) {
         const today = moment().utc();
-        const { name, tree, api, fetchData, updateDates, bugId } = this.props;
+        const { fetchData, updateDates, name, graphName, tree, tableApi, graphApi, bugId } = this.props;
         const [ISOto, to] = formatDates(today);
         const [ISOfrom, from] = formatDates(today.subtract(fromDate, "days"));
-        let url = apiUrlFormatter(api, ISOfrom, ISOto, tree, bugId);
-        fetchData(url, name);
+        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), name);
+        fetchData(apiUrlFormatter(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
         updateDates(from, to, name);
     }
 
     render() {
-        const { name, tree, api, bugId } = this.props;
+        const { name, graphName, tree, tableApi, graphApi, bugId } = this.props;
         const { dropdownOpen, dateRange } = this.state;
         const dateOptions = ["last 7 days", "last 30 days", "custom range", "entire history"];
 
@@ -65,7 +66,9 @@ class DateOptions extends React.Component {
                 <DropdownMenuItems options={dateOptions} updateData={this.updateDateRange} />
             </ButtonDropdown>
         {dateRange === "custom range" &&
-        <DateRangePicker name={name} tree={tree} api={api} bugId={bugId} />}
+        <DateRangePicker tree={tree} tableApi={tableApi} graphApi={graphApi} name={name}
+                         graphName={graphName} bugId={bugId}
+        />}
         </div>
         );
     }

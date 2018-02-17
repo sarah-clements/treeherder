@@ -13,17 +13,24 @@ class GenericTable extends React.Component {
         this.state = {
         };
         this.updateData = this.updateData.bind(this);
+        this.refreshTable = this.refreshTable.bind(this);
     }
 
-    updateData(state) {
+    refreshTable(state) {
+        // table's page count starts at 0
+        const page = state.page + 1;
         let search;
+
         if (state.filtered.length > 0) {
             search = state.filtered[0].value;
         }
-        const page = state.page + 1;
-        const { fetchData, tableName, tree, tableApi, ISOfrom, ISOto, bugId } = this.props;
-        let url = apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId, page, search);
-        fetchData(url, tableName);
+        //TODO: figure out a way to only submit a search query when enter is pressed
+        this.updateData(page, search);
+    }
+
+    updateData(page, search) {
+        const { fetchData, name, tree, tableApi, ISOfrom, ISOto, bugId } = this.props;
+        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId, page, search), name);
     }
 
     bugRowStyling(state, bug) {
@@ -50,7 +57,7 @@ class GenericTable extends React.Component {
             <ReactTable
                         manual
                         data={bugs}
-                        onFetchData={this.updateData}
+                        onFetchData={this.refreshTable}
                         pages={totalPages}
                         showPageSizeOptions={false}
                         columns={columns}

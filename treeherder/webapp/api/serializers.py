@@ -262,7 +262,7 @@ class FailuresSerializer(serializers.ModelSerializer):
 
 
 class FailuresByBugSerializer(serializers.ModelSerializer):
-    test_suite = serializers.CharField(source='job__signature__job_type_name')
+    test_suite = serializers.CharField()
     platform = serializers.CharField(source='job__machine_platform__platform')
     revision = serializers.CharField(source='job__push__revision')
     tree = serializers.CharField(source='job__repository__name')

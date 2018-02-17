@@ -1,4 +1,5 @@
-from django.db.models import Count, Subquery, IntegerField, OuterRef
+import re
+from django.db.models import Count
 from django.db.models.functions import TruncDate
 from rest_framework import (generics, views)
 from treeherder.model.models import (Bugscache, BugJobMap, Job, Push)
@@ -20,7 +21,7 @@ class Failures(generics.ListAPIView):
         tree = _get_tree(self.request.query_params.get('tree').encode('utf-8'))
         search = self.request.query_params.get('search')
 
-        query = Bugscache.objects.filter(modified__range=(startday, endday))
+        query = Bugscache.objects.filter(modified__range=(startday, endday)).order_by('modified')
 
         if search:
             queryset = query.filter(summary__icontains=search).order_by('modified')
@@ -47,9 +48,13 @@ class FailuresByBug(generics.ListAPIView):
         queryset = BugJobMap.objects.select_related('job', 'push').filter(bug_id=bug_id, job__repository_id__in=tree,
                                                                           job__push__time__range=(startday, endday))\
             .values('bug_id', 'job_id', 'job__push__time', 'job__repository__name', 'job__option_collection_hash',
-                    'job__signature__job_type_name', 'job__push__revision', 'job__machine_platform__platform')
+                    'job__signature__job_type_name', 'job__push__revision', 'job__machine_platform__platform')\
+            .order_by('job__push__time')
 
         for item in queryset:
+            test_type = item['job__signature__job_type_name']
+            item['test_suite'] = re.sub(r'.+/', '', test_type)
+
             hash_lookup = OPTION_COLLECTION_HASH_MAP[item['job__option_collection_hash']]
             if hash_lookup:
                 item['build_type'] = hash_lookup
@@ -73,24 +78,25 @@ class FailureCount(generics.ListAPIView):
              .annotate(test_runs=Count('author')).order_by('date').values('date', 'test_runs')
 
         if bug_id:
-            queryset = BugJobMap.objects.filter(job__repository_id__in=tree, job__push__time__range=(startday, endday),
+            job_query = BugJobMap.objects.filter(job__repository_id__in=tree, job__push__time__range=(startday, endday),
                                                 job__failure_classification__id=4, bug_id=int(bug_id))\
                 .select_related('job', 'push').annotate(date=TruncDate('job__push__time'))\
                 .values('date').annotate(failure_count=Count('id')).order_by('date').values('date', 'failure_count')
         else:
-            queryset = Job.objects.select_related('push').filter(push__time__range=(startday, endday), repository_id__in=tree,
+            job_query = Job.objects.select_related('push').filter(push__time__range=(startday, endday), repository_id__in=tree,
                                                            failure_classification_id=4)\
                 .annotate(date=TruncDate('push__time'))\
                 .values('date').annotate(failure_count=Count('id')).order_by('date').values('date', 'failure_count')
 
-        # queryset = []
-        for job, push in zip(queryset, push_query):
-            # queryset.append(
-            #     {'date': job['date'], 'failure_count': job['failure_count'], 'test_runs': push['test_runs']})
-            if job['date'] == push['date']:
-                job['test_runs'] = push['test_runs']
+        queryset = []
+
+        for push in push_query:
+            match = filter(lambda x: push['date'] == x['date'], job_query)
+            if len(match) > 0:
+                match[0]['test_runs'] = push['test_runs']
+                queryset.append(match[0])
             else:
-                job['test_runs'] = 0
+                queryset.append({'date': push['date'], 'test_runs': push['test_runs'], 'failure_count': 0})
 
         return queryset
 

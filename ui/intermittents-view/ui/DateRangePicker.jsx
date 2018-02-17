@@ -52,8 +52,8 @@ class DateRangePicker extends React.Component {
     updateData() {
         const [ISOto, to] = formatDates(moment(this.state.to));
         const [ISOfrom, from] = formatDates(moment(this.state.from));
-        const { fetchData, updateDates, tableName, graphName, tree, tableApi, graphApi, bugId } = this.props;
-        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), tableName);
+        const { fetchData, updateDates, name, graphName, tree, tableApi, graphApi, bugId } = this.props;
+        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), name);
         fetchData(apiUrlFormatter(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
         updateDates(from, to, name);
     }

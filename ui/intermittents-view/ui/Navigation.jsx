@@ -21,8 +21,8 @@ class Navigation extends React.Component {
 
 
     updateData(tree) {
-        const { fetchData, updateTree, tableName, graphName, ISOfrom, ISOto, tableApi, graphApi, bugId } = this.props;
-        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), tableName);
+        const { fetchData, updateTree, name, graphName, ISOfrom, ISOto, tableApi, graphApi, bugId } = this.props;
+        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), name);
         fetchData(apiUrlFormatter(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
         updateTree(tree, name);
     }

@@ -7,7 +7,7 @@ const getInitialDates = (today) => {
     return { from, to, ISOfrom, ISOto };
 };
 
-export const fetchData = (name = "") => (state = { data: {}, failureMessage: "" }, action) => {
+export const fetchData = (name = "") => (state = { data: {}, message: "" }, action) => {
     switch (action.type) {
         // case "REQUEST_BUGS_DATA":
         //     return {
@@ -22,14 +22,14 @@ export const fetchData = (name = "") => (state = { data: {}, failureMessage: "" 
         case `FETCH_${name}_FAILURE`:
             return {
                 ...state,
-                message: action.failureMessage,
+                message: action.message,
             };
     default:
             return state;
     }
 };
 
-export const updateDates = (name = "") => (state = getInitialDates(moment()), action) => {
+export const updateDates = (name = "") => (state = getInitialDates(moment().utc()), action) => {
     switch (action.type) {
         case `UPDATE_${name}_DATE_RANGE`:
             return {
