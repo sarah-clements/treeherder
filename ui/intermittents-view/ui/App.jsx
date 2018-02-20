@@ -16,7 +16,7 @@ const App = ({ store }) => {
             <HashRouter>
                 <main>
                     <Switch>
-                        <Route path="/main" component={IntermittentsView} />
+                        <Route exact path="/main" component={IntermittentsView} />
                         <Route path="/main?startday=:startday&endday=:endday&tree=:tree" component={IntermittentsView} />
                         <Route path="/bugdetails" component={BugDetailsView} />
                         <Route path="/bugdetails?startday=:startday&endday=:endday&tree=:tree&bug=bug" component={BugDetailsView} />
@@ -24,14 +24,6 @@ const App = ({ store }) => {
                     </Switch>
                 </main>
             </HashRouter>
-            {/* <BrowserRouter>
-                <main>
-                    <Switch>
-                        <Route exact path="/intermittentsview.html" component={IntermittentsView} />
-                        <Route path="/bugdetailsview" component={BugDetailsView} />
-                    </Switch>
-                </main>
-            </BrowserRouter> */}
         </Provider>
     );
 };

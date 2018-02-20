@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import Icon from "react-fontawesome";
 import Navigation from "./Navigation";
-import { fetchBugData, updateDateRange, updateTreeName } from "./../redux/actions";
+import { fetchBugData } from "./../redux/actions";
 import GenericTable from "./GenericTable";
 import GraphsContainer from "./GraphsContainer";
 import { calculateMetrics, jobsUrl, apiUrlFormatter, logviewerUrl } from "../helpers";
@@ -26,10 +26,6 @@ class BugDetailsView extends React.Component {
 
 componentDidMount() {
     console.log(this.props.location);
-    const { from, to, tree } = this.props.location.state;
-    const { updateDates, updateTree } = this.props;
-    updateTree(tree, "BUG_DETAILS");
-    updateDates(from, to, "BUG_DETAILS");
     this.updateData("failurecount", "BUG_DETAILS_GRAPHS");
 }
 
@@ -41,15 +37,12 @@ componentWillReceiveProps(nextProps) {
 }
 
 updateData(api, name) {
-    const { fetchData, ISOfrom, ISOto, tree } = this.props;
-    const { bugId } = this.props.location.state;
-    let url = apiUrlFormatter(api, ISOfrom, ISOto, tree, bugId);
-    fetchData(url, name);
+    const { fetchData, ISOfrom, ISOto, tree, bugId } = this.props;
+    fetchData(apiUrlFormatter(api, ISOfrom, ISOto, tree, bugId), name);
 }
 
 render() {
-    const { bugId, summary } = this.props.location.state;
-    const { tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, bugDetails, tree } = this.props;
+    const { tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, bugDetails, tree, bugId, summary } = this.props;
     const { graphOneData, graphTwoData } = this.state;
     const totalCount = bugDetails.results ? bugDetails.results.length : 0;
     const columns = [
@@ -132,13 +125,15 @@ const mapStateToProps = state => ({
     to: state.bugDetailsDates.to,
     ISOfrom: state.bugDetailsDates.ISOfrom,
     ISOto: state.bugDetailsDates.ISOto,
-    tree: state.bugDetailsTree.tree
+    tree: state.bugDetailsTree.tree,
+    bugId: state.bugDetails.bugId,
+    summary: state.bugDetails.summary
 });
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
-    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
-    updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
+    // updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
+    // updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);

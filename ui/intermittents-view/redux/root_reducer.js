@@ -1,5 +1,5 @@
 import { combineReducers } from "redux";
-import { fetchData, updateDates, updateTree } from "./reducers";
+import { fetchData, updateDates, updateTree, updateBugDetails } from "./reducers";
 
 const rootReducer = combineReducers({
     bugsData: fetchData("BUGS"),
@@ -9,7 +9,8 @@ const rootReducer = combineReducers({
     dates: updateDates("BUGS"),
     bugDetailsDates: updateDates("BUG_DETAILS"),
     mainTree: updateTree("BUGS"),
-    bugDetailsTree: updateTree("BUG_DETAILS")
+    bugDetailsTree: updateTree("BUG_DETAILS"),
+    bugDetails: updateBugDetails("BUG_DETAILS")
 });
 
 export default rootReducer;

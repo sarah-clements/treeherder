@@ -12,7 +12,7 @@ export default class DropdownMenuItems extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps) {
+        if (nextProps.default) {
             this.setState({ selectedItem: nextProps.default });
         }
     }
