@@ -8,6 +8,7 @@ import { fetchBugData } from "./../redux/actions";
 import BugColumn from "./BugColumn";
 import { apiUrlFormatter, calculateMetrics } from "../helpers";
 import GraphsContainer from "./GraphsContainer";
+// const _ = require('lodash');
 
 class IntermittentsView extends React.Component {
   constructor(props) {
@@ -23,13 +24,25 @@ class IntermittentsView extends React.Component {
 }
 
 componentDidMount() {
-    const { results } = this.props.bugs;
-    if (!results) {
+    const { bugs } = this.props;
+    if (!bugs.results) {
         this.updateData("failurecount", "BUGS_GRAPHS");
     }
 }
 
+// const { location, fetchData } = this.props;
+// let ISOfrom, ISOto, tree;
+
+// if (_.isEmpty(location.search)) {
+//     ({ ISOfrom, ISOto, tree } = this.props);
+// } else {
+//     //TODO: error handling if date range is longer than 4 months
+//     [ISOfrom, ISOto, tree] = urlParams(location.search);
+//     this.props.updateDates(ISOfrom, ISOto, "BUGS");
+// }
+
 componentWillReceiveProps(nextProps) {
+    console.log(nextProps.location);
     if (nextProps.graphs.length > 0) {
         this.setState(calculateMetrics(nextProps.graphs));
     }
@@ -65,7 +78,7 @@ render() {
         },
         {
           Header: "Whiteboard",
-          accessor: "modified",
+          accessor: "whiteboard",
           minWidth: 150
         }
       ];

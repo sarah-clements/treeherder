@@ -257,8 +257,7 @@ class FailuresSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Bugscache
-        fields = ('id', 'status', 'summary', 'modified')
-        #TODO add 'whiteboard' to fields
+        fields = ('id', 'status', 'summary', 'whiteboard')
 
 
 class FailuresByBugSerializer(serializers.ModelSerializer):

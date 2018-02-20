@@ -19,15 +19,22 @@ body {
 .btn-navbar {
     background-color: transparent;
     border-color: #373d40;
-    color: lightgray;
     border-radius: 0;
     border-bottom: 0;
     border-top: 0;
     border-right: 0;
 }
 
+.navbar-link {
+    color: lightgray;
+}
+
 .navbar-link:hover {
     color: #eba870;
+}
+
+.navbar-link:visited {
+    color: lightgray;
 }
 
 .navbar-input {

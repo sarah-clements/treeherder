@@ -17,12 +17,15 @@ class BugDetailsView extends React.Component {
         graphOneData: null,
         graphTwoData: null,
         totalFailures: 0,
-        totalRuns: 0
+        totalRuns: 0,
+        bugId: null,
+        summary: null
     };
     this.updateData = this.updateData.bind(this);
 }
 
 componentDidMount() {
+    console.log(this.props.location);
     const { from, to, tree } = this.props.location.state;
     const { updateDates, updateTree } = this.props;
     updateTree(tree, "BUG_DETAILS");
@@ -31,6 +34,7 @@ componentDidMount() {
 }
 
 componentWillReceiveProps(nextProps) {
+    console.log(nextProps.location);
     if (nextProps.graphs.length > 0) {
         this.setState(calculateMetrics(nextProps.graphs));
     }
@@ -86,7 +90,7 @@ render() {
                         name="BUG_DETAILS" graphName="BUG_DETAILS_GRAPHS" tree={tree} bugId={bugId}
             />
             <Row>
-                <Col xs="12"><span className="pull-left"><Link to="/intermittentsview.html"><Icon name="arrow-left" className="pr-1" />back</Link></span></Col>
+                <Col xs="12"><span className="pull-left"><Link to="/"><Icon name="arrow-left" className="pr-1" />back</Link></span></Col>
             </Row>
             <Row>
                 <Col xs="12" className="mx-auto"><h1>{`Details for Bug ${bugId}`}</h1></Col>

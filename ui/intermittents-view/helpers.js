@@ -28,7 +28,7 @@ export const apiUrlFormatter = (path, startDay, endDay, tree, bugId, page, searc
 //TODO - replace localhost path with SERVICE_DOMAIN
 export const logviewerUrl = (tree, treeherderId) => `logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
 
-export const jobsUrl = (tree, revision) => `localhost:8000/#/jobs?repo=${tree}&revision=${revision}`;
+export const jobsUrl = (tree, revision) => `http://localhost:8000/#/jobs?repo=${tree}&revision=${revision}`;
 
 export const calculateMetrics = (data) => {
     let dateCounts = [];
