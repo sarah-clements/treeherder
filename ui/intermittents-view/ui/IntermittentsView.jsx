@@ -17,10 +17,12 @@ class IntermittentsView extends React.Component {
         graphTwoData: null,
         totalFailures: 0,
         totalRuns: 0,
-        textInput: ''
+        searchInput: ''
     };
     this.updateData = this.updateData.bind(this);
     this.updateStateData = this.updateStateData.bind(this);
+    this.updateInput = this.updateInput.bind(this);
+    this.resetInput = this.resetInput.bind(this);
 }
 
 componentDidMount() {
@@ -66,9 +68,21 @@ updateData(api, name) {
     fetchData(apiUrlFormatter(api, ISOfrom, ISOto, tree), name);
 }
 
+updateInput(event) {
+    if (event.charCode === 13 && event.target.value) {
+        this.setState({ searchInput: event.target.value });
+    }
+}
+
+resetInput(event) {
+    if (this.state.searchInput !== '' && event.target.value === '') {
+        this.setState({ searchInput: '' });
+    }
+}
+
 render() {
     const { bugs, tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, tree } = this.props;
-    const { graphOneData, graphTwoData, totalFailures, totalRuns } = this.state;
+    const { graphOneData, graphTwoData, totalFailures, totalRuns, searchInput } = this.state;
     const columns = [
         {
           Header: "Bug ID",
@@ -84,9 +98,9 @@ render() {
           accessor: "summary",
           minWidth: 250,
           filterable: true,
-          // Filter: () => (<input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }}
-          //                      onChange={event => this.changeInput(event)} placeholder="Search summary..."
-          // />)
+          Filter: () => (<input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }} placeholder="Search summary..."
+                               onKeyPress={event => this.updateInput(event)} onChange={event => this.resetInput(event)}
+          />)
         },
         {
           Header: "Whiteboard",
@@ -117,7 +131,7 @@ render() {
 
             {!tableFailureMessage && bugs ?
             <GenericTable bugs={bugs.results} columns={columns} name="BUGS" tableApi="failures" ISOfrom={ISOfrom}
-                          ISOto={ISOto} tree={tree} totalPages={bugs.total_pages}trStyling
+                          ISOto={ISOto} tree={tree} totalPages={bugs.total_pages} searchInput={searchInput} trStyling
             /> : <p>{tableFailureMessage}</p>}
         </Container>);
     }

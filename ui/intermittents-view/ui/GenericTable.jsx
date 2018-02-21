@@ -11,21 +11,22 @@ class GenericTable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            pageNum: 1
         };
         this.updateData = this.updateData.bind(this);
-        this.refreshTable = this.refreshTable.bind(this);
+        this.navigateTable = this.navigateTable.bind(this);
     }
 
-    refreshTable(state) {
-        // table's page count starts at 0
-        const page = state.page + 1;
-        let search;
-
-        if (state.filtered.length > 0) {
-            search = state.filtered[0].value;
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.searchInput !== this.props.searchInput) {
+            this.updateData(this.state.pageNum, nextProps.searchInput);
         }
-        //TODO: figure out a way to only submit a search query when enter is pressed
-        this.updateData(page, search);
+    }
+
+    navigateTable(state) {
+        // table's page count starts at 0
+        const pageNum = state.page + 1;
+        this.setState({ pageNum }, () => this.updateData(pageNum, this.props.searchInput));
     }
 
     updateData(page, search) {
@@ -57,7 +58,7 @@ class GenericTable extends React.Component {
             <ReactTable
                         manual
                         data={bugs}
-                        onFetchData={this.refreshTable}
+                        onFetchData={this.navigateTable}
                         pages={totalPages}
                         showPageSizeOptions={false}
                         columns={columns}
