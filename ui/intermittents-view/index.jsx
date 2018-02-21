@@ -11,12 +11,12 @@ import store from "./redux/store";
 
 const load = () => render((
     <AppContainer>
-            <App store={store} />
+        <App store={store} />
     </AppContainer>
 ), document.getElementById("root"));
 
-if (module.hot) {
-  module.hot.accept("./ui/App", load);
-}
-
 load();
+
+if (module.hot) {
+  module.hot.accept("./ui/App", () => load(App));
+}

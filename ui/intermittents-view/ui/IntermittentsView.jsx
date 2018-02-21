@@ -46,6 +46,7 @@ componentWillReceiveProps(nextProps) {
 
         if (queryParams !== history.location.search) {
             history.replace(`/main${queryParams}`);
+            //we do this so api's won't be called twice (because location.search will update)
             this.props.location.search = queryParams;
         }
     }

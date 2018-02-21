@@ -60,13 +60,20 @@ export const parseUrlParams = (search) => {
     const ISOto = params.get("endday");
     const from = moment(ISOfrom).format("ddd MMM D, YYYY");
     const to = moment(ISOto).format("ddd MMM D, YYYY");
+    const bugId = params.get("bug");
+    if (bugId) {
+        return [from, to, ISOfrom, ISOto, params.get("tree"), bugId];
+    }
     return [from, to, ISOfrom, ISOto, params.get("tree")];
 };
 
-export const updateUrlParams = (ISOfrom, ISOto, tree) => {
+export const updateUrlParams = (ISOfrom, ISOto, tree, bugId) => {
     let params = new URLSearchParams();
     params.set("startday", ISOfrom);
     params.set("endday", ISOto);
     params.set("tree", tree);
+    if (bugId) {
+        params.set("bug", bugId);
+    }
     return `?${params.toString()}`;
 };

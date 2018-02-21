@@ -5,10 +5,10 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import Icon from "react-fontawesome";
 import Navigation from "./Navigation";
-import { fetchBugData, updateDateRange, updateTreeName } from "./../redux/actions";
+import { fetchBugData, updateDateRange, updateTreeName, updateSelectedBugDetails } from "./../redux/actions";
 import GenericTable from "./GenericTable";
 import GraphsContainer from "./GraphsContainer";
-import { calculateMetrics, jobsUrl, apiUrlFormatter, logviewerUrl, parseUrlParams } from "../helpers";
+import { calculateMetrics, jobsUrl, apiUrlFormatter, logviewerUrl, parseUrlParams, updateUrlParams } from "../helpers";
 
 class BugDetailsView extends React.Component {
   constructor(props) {
@@ -30,7 +30,7 @@ componentDidMount() {
 }
 
 componentWillReceiveProps(nextProps) {
-    const { graphs, location } = nextProps;
+    const { graphs, history, ISOfrom, ISOto, tree, location, bugId } = nextProps;
 
     if (graphs.length > 0 && graphs !== this.props.graphs) {
         this.setState(calculateMetrics(graphs));
@@ -38,15 +38,27 @@ componentWillReceiveProps(nextProps) {
     if (location.search !== this.props.location.search) {
         this.updateStateData(location.search);
     }
+    //update query params in the address bar if dates or tree are updated via the UI
+    if (ISOfrom !== this.props.ISOfrom || ISOto !== this.props.ISOto || tree !== this.props.tree) {
+        const queryParams = updateUrlParams(ISOfrom, ISOto, tree, bugId);
+
+        if (queryParams !== history.location.search) {
+            history.replace(`/bugdetails${queryParams}`);
+            //we do this so api's won't be called twice (because location.search will update)
+            this.props.location.search = queryParams;
+        }
+    }
 }
 
 updateStateData(params) {
-    const [from, to, ISOfrom, ISOto, tree] = parseUrlParams(params);
-    const { updateTree, updateDates, fetchData, bugId } = this.props;
-    updateDates(from, to, ISOfrom, ISOto, "BUGS_DETAILS");
-    updateTree(tree, "BUGS_DETAILS");
-    fetchData(apiUrlFormatter("failurecount", ISOfrom, ISOto, tree, bugId), "BUGS_DETAILS_GRAPHS");
-    fetchData(apiUrlFormatter("failuresbybug", ISOfrom, ISOto, tree, bugId), "BUGS_DETAILS");
+    const [from, to, ISOfrom, ISOto, tree, bugId] = parseUrlParams(params);
+    const { updateTree, updateDates, fetchData, updateBugDetails } = this.props;
+    updateDates(from, to, ISOfrom, ISOto, "BUG_DETAILS");
+    updateTree(tree, "BUG_DETAILS");
+    // Todo fetch summary from bugzilla
+    updateBugDetails(bugId, "", "BUG_DETAILS");
+    fetchData(apiUrlFormatter("failurecount", ISOfrom, ISOto, tree, bugId), "BUG_DETAILS_GRAPHS");
+    fetchData(apiUrlFormatter("failuresbybug", ISOfrom, ISOto, tree, bugId), "BUG_DETAILS");
 }
 
 updateData(api, name) {
@@ -145,8 +157,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
-    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
-    updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
+    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
+    updateTree: (tree, name) => dispatch(updateTreeName(tree, name)),
+    updateBugDetails: (bugId, summary, name) => dispatch(updateSelectedBugDetails(bugId, summary, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);
