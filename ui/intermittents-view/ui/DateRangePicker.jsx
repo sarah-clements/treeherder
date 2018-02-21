@@ -55,7 +55,7 @@ class DateRangePicker extends React.Component {
         const { fetchData, updateDates, name, graphName, tree, tableApi, graphApi, bugId } = this.props;
         fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), name);
         fetchData(apiUrlFormatter(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
-        updateDates(from, to, name);
+        updateDates(from, to, ISOfrom, ISOto, name);
     }
 
     render() {
@@ -108,7 +108,7 @@ class DateRangePicker extends React.Component {
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
-    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name))
+    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
 });
 
 export default connect(null, mapDispatchToProps)(DateRangePicker);

@@ -54,3 +54,19 @@ export const calculateMetrics = (data) => {
     return { graphOneData: dateFreqs, graphTwoData: [dateCounts, dateTestRunCounts], totalFailures, totalRuns };
 };
 
+export const parseUrlParams = (search) => {
+    const params = new URLSearchParams(search);
+    const ISOfrom = params.get("startday");
+    const ISOto = params.get("endday");
+    const from = moment(ISOfrom).format("ddd MMM D, YYYY");
+    const to = moment(ISOto).format("ddd MMM D, YYYY");
+    return [from, to, ISOfrom, ISOto, params.get("tree")];
+};
+
+export const updateUrlParams = (ISOfrom, ISOto, tree) => {
+    let params = new URLSearchParams();
+    params.set("startday", ISOfrom);
+    params.set("endday", ISOto);
+    params.set("tree", tree);
+    return `?${params.toString()}`;
+};

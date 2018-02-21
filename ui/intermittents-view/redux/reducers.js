@@ -35,7 +35,9 @@ export const updateDates = (name = "") => (state = getInitialDates(moment().utc(
             return {
                 ...state,
                 from: action.from,
-                to: action.to
+                to: action.to,
+                ISOfrom: action.ISOfrom,
+                ISOto: action.ISOto
             };
     default:
             return state;

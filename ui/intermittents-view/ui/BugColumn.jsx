@@ -10,18 +10,19 @@ class BugColumn extends React.Component {
             displayBugDetails: false,
         };
         this.displayBugText = this.displayBugText.bind(this);
-        this.updateData = this.updateData.bind(this);
+        this.updateStateData = this.updateStateData.bind(this);
     }
 
     displayBugText() {
         this.setState({ displayBugDetails: !this.state.displayBugDetails });
     }
 
-    updateData() {
-        const { data, updateDates, updateTree, updateBugDetails, from, to, tree } = this.props;
+    updateStateData() {
+        // bugdetailsview inherits certain data from the main view
+        const { data, updateDates, updateTree, updateBugDetails, from, to, ISOfrom, ISOto, tree } = this.props;
         updateBugDetails(data.id, data.summary, "BUG_DETAILS");
         updateTree(tree, "BUG_DETAILS");
-        updateDates(from, to, "BUG_DETAILS");
+        updateDates(from, to, ISOfrom, ISOto, "BUG_DETAILS");
     }
 
     render() {
@@ -31,7 +32,7 @@ class BugColumn extends React.Component {
         return (
             <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
                 <span className="text-primary">{id}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
-                    <Link onClick={this.updateData} to={{ pathname: "/bugdetails", search: `?startday=${ISOfrom}&endday=${ISOto}&tree=${tree}&bug=${id}` }}>
+                    <Link onClick={this.updateStateData} to={{ pathname: "/bugdetails", search: `?startday=${ISOfrom}&endday=${ISOto}&tree=${tree}&bug=${id}` }}>
                         details
                     </Link>
                     <a className="ml-1" target="_blank" href={bugzillaBugUrl + id}>bugzilla</a>
@@ -51,7 +52,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     updateBugDetails: (bugId, summary, name) => dispatch(updateSelectedBugDetails(bugId, summary, name)),
-    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
+    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });
 

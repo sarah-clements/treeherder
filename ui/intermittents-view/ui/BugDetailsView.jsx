@@ -5,10 +5,10 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import Icon from "react-fontawesome";
 import Navigation from "./Navigation";
-import { fetchBugData } from "./../redux/actions";
+import { fetchBugData, updateDateRange, updateTreeName } from "./../redux/actions";
 import GenericTable from "./GenericTable";
 import GraphsContainer from "./GraphsContainer";
-import { calculateMetrics, jobsUrl, apiUrlFormatter, logviewerUrl } from "../helpers";
+import { calculateMetrics, jobsUrl, apiUrlFormatter, logviewerUrl, parseUrlParams } from "../helpers";
 
 class BugDetailsView extends React.Component {
   constructor(props) {
@@ -22,18 +22,31 @@ class BugDetailsView extends React.Component {
         summary: null
     };
     this.updateData = this.updateData.bind(this);
+    this.updateStateData = this.updateStateData.bind(this);
 }
 
 componentDidMount() {
-    console.log(this.props.location);
     this.updateData("failurecount", "BUG_DETAILS_GRAPHS");
 }
 
 componentWillReceiveProps(nextProps) {
-    console.log(nextProps.location);
-    if (nextProps.graphs.length > 0) {
-        this.setState(calculateMetrics(nextProps.graphs));
+    const { graphs, location } = nextProps;
+
+    if (graphs.length > 0 && graphs !== this.props.graphs) {
+        this.setState(calculateMetrics(graphs));
     }
+    if (location.search !== this.props.location.search) {
+        this.updateStateData(location.search);
+    }
+}
+
+updateStateData(params) {
+    const [from, to, ISOfrom, ISOto, tree] = parseUrlParams(params);
+    const { updateTree, updateDates, fetchData, bugId } = this.props;
+    updateDates(from, to, ISOfrom, ISOto, "BUGS_DETAILS");
+    updateTree(tree, "BUGS_DETAILS");
+    fetchData(apiUrlFormatter("failurecount", ISOfrom, ISOto, tree, bugId), "BUGS_DETAILS_GRAPHS");
+    fetchData(apiUrlFormatter("failuresbybug", ISOfrom, ISOto, tree, bugId), "BUGS_DETAILS");
 }
 
 updateData(api, name) {
@@ -132,8 +145,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
-    // updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
-    // updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
+    updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);

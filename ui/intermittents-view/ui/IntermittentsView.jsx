@@ -4,11 +4,10 @@ import { Container, Row, Col } from "reactstrap";
 import PropTypes from "prop-types";
 import Navigation from "./Navigation";
 import GenericTable from "./GenericTable";
-import { fetchBugData } from "./../redux/actions";
+import { fetchBugData, updateTreeName, updateDateRange } from "./../redux/actions";
 import BugColumn from "./BugColumn";
-import { apiUrlFormatter, calculateMetrics } from "../helpers";
+import { apiUrlFormatter, calculateMetrics, parseUrlParams, updateUrlParams } from "../helpers";
 import GraphsContainer from "./GraphsContainer";
-// const _ = require('lodash');
 
 class IntermittentsView extends React.Component {
   constructor(props) {
@@ -21,6 +20,7 @@ class IntermittentsView extends React.Component {
         textInput: ''
     };
     this.updateData = this.updateData.bind(this);
+    this.updateStateData = this.updateStateData.bind(this);
 }
 
 componentDidMount() {
@@ -30,28 +30,39 @@ componentDidMount() {
     }
 }
 
-// const { location, fetchData } = this.props;
-// let ISOfrom, ISOto, tree;
-
-// if (_.isEmpty(location.search)) {
-//     ({ ISOfrom, ISOto, tree } = this.props);
-// } else {
-//     //TODO: error handling if date range is longer than 4 months
-//     [ISOfrom, ISOto, tree] = urlParams(location.search);
-//     this.props.updateDates(ISOfrom, ISOto, "BUGS");
-// }
-
 componentWillReceiveProps(nextProps) {
-    console.log(nextProps.location);
-    if (nextProps.graphs.length > 0) {
-        this.setState(calculateMetrics(nextProps.graphs));
+    const { graphs, history, ISOfrom, ISOto, tree, location } = nextProps;
+
+    if (graphs.length > 0 && (graphs !== this.props.graphs || !this.state.graphOneData)) {
+        this.setState(calculateMetrics(graphs));
     }
+    //update all data if the user edits dates or tree via the query params
+    if (location.search !== this.props.location.search) {
+        this.updateStateData(location.search);
+    }
+    //update query params in the address bar if dates or tree are updated via the UI
+    if (ISOfrom !== this.props.ISOfrom || ISOto !== this.props.ISOto || tree !== this.props.tree) {
+        const queryParams = updateUrlParams(ISOfrom, ISOto, tree);
+
+        if (queryParams !== history.location.search) {
+            history.replace(`/main${queryParams}`);
+            this.props.location.search = queryParams;
+        }
+    }
+}
+
+updateStateData(params) {
+    const [from, to, ISOfrom, ISOto, tree] = parseUrlParams(params);
+    const { updateTree, updateDates, fetchData } = this.props;
+    updateDates(from, to, ISOfrom, ISOto, "BUGS");
+    updateTree(tree, "BUGS");
+    fetchData(apiUrlFormatter("failurecount", ISOfrom, ISOto, tree), "BUGS_GRAPHS");
+    fetchData(apiUrlFormatter("failures", ISOfrom, ISOto, tree), "BUGS");
 }
 
 updateData(api, name) {
     const { fetchData, ISOfrom, ISOto, tree } = this.props;
-    let url = apiUrlFormatter(api, ISOfrom, ISOto, tree);
-    fetchData(url, name);
+    fetchData(apiUrlFormatter(api, ISOfrom, ISOto, tree), name);
 }
 
 render() {
@@ -128,7 +139,9 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: (url, name) => dispatch(fetchBugData(url, name))
+    fetchData: (url, name) => dispatch(fetchBugData(url, name)),
+    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
+    updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(IntermittentsView);
