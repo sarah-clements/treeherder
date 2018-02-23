@@ -1,12 +1,23 @@
+import { bugzillaBugsApi, formatBugsForBugzilla } from "../helpers";
 
 export const fetchBugData = (url, name) => dispatch => (
     fetch(url).then(response => response.json())
     .then(json => dispatch(fetchBugDataSuccess(json, name)))
     .catch((error) => {
-        console.log("fetchBugData failed: " + error);
+        console.log("fetching data failed: " + error);
         dispatch(fetchBugDataFailure(name));
     })
 );
+
+export const fetchBugsThenBugzilla = (url, name) => (dispatch, getState) => (
+    dispatch(fetchBugData(url, name)
+    ).then(() => {
+        const { results } = getState().bugsData.data;
+        const bugs_list = formatBugsForBugzilla(results);
+        return dispatch(fetchBugData(bugzillaBugsApi(bugs_list), "BUGZILLA"));
+    })
+);
+
 
 //action creators
 // export const requestBugData = () => ({

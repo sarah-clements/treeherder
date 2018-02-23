@@ -4,9 +4,9 @@ import { Container, Row, Col } from "reactstrap";
 import PropTypes from "prop-types";
 import Navigation from "./Navigation";
 import GenericTable from "./GenericTable";
-import { fetchBugData, updateTreeName, updateDateRange } from "./../redux/actions";
+import { fetchBugData, updateTreeName, updateDateRange, fetchBugsThenBugzilla } from "./../redux/actions";
 import BugColumn from "./BugColumn";
-import { apiUrlFormatter, calculateMetrics, parseUrlParams, updateUrlParams } from "../helpers";
+import { apiUrlFormatter, calculateMetrics, mergeBugsData, parseUrlParams, updateUrlParams } from "../helpers";
 import GraphsContainer from "./GraphsContainer";
 
 class IntermittentsView extends React.Component {
@@ -17,21 +17,28 @@ class IntermittentsView extends React.Component {
         graphTwoData: null,
         totalFailures: 0,
         totalRuns: 0,
-        textInput: ''
+        bugsData: null
     };
     this.updateData = this.updateData.bind(this);
     this.updateStateData = this.updateStateData.bind(this);
 }
 
 componentDidMount() {
-    const { bugs } = this.props;
-    if (!bugs.results) {
+    const { graphs, bugs, ISOfrom, ISOto, tree, fetchFullBugData } = this.props;
+    if (!graphs.results) {
         this.updateData("failurecount", "BUGS_GRAPHS");
+    }
+    if (!bugs.results) {
+        fetchFullBugData(apiUrlFormatter("failures", ISOfrom, ISOto, tree), "BUGS");
     }
 }
 
 componentWillReceiveProps(nextProps) {
-    const { graphs, history, ISOfrom, ISOto, tree, location } = nextProps;
+    const { graphs, history, ISOfrom, ISOto, tree, location, bugs, bugzillaData } = nextProps;
+
+    if (bugzillaData.bugs && bugzillaData.bugs !== this.props.bugzillaData.bugs) {
+        this.setState(mergeBugsData(bugs.results, bugzillaData.bugs));
+    }
 
     if (graphs.length > 0 && (graphs !== this.props.graphs || !this.state.graphOneData)) {
         this.setState(calculateMetrics(graphs));
@@ -54,11 +61,11 @@ componentWillReceiveProps(nextProps) {
 
 updateStateData(params) {
     const [from, to, ISOfrom, ISOto, tree] = parseUrlParams(params);
-    const { updateTree, updateDates, fetchData } = this.props;
+    const { updateTree, updateDates, fetchData, fetchFullBugData } = this.props;
     updateDates(from, to, ISOfrom, ISOto, "BUGS");
     updateTree(tree, "BUGS");
     fetchData(apiUrlFormatter("failurecount", ISOfrom, ISOto, tree), "BUGS_GRAPHS");
-    fetchData(apiUrlFormatter("failures", ISOfrom, ISOto, tree), "BUGS");
+    fetchFullBugData(apiUrlFormatter("failures", ISOfrom, ISOto, tree), "BUGS");
 }
 
 updateData(api, name) {
@@ -68,7 +75,7 @@ updateData(api, name) {
 
 render() {
     const { bugs, tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, tree } = this.props;
-    const { graphOneData, graphTwoData, totalFailures, totalRuns } = this.state;
+    const { graphOneData, graphTwoData, totalFailures, totalRuns, bugsData } = this.state;
     const columns = [
         {
           Header: "Bug ID",
@@ -77,16 +84,12 @@ render() {
         },
         {
           Header: "Count",
-          accessor: "status",
+          accessor: "count",
         },
         {
           Header: "Summary",
           accessor: "summary",
           minWidth: 250,
-          filterable: true,
-          // Filter: () => (<input style={{ width: "100%", borderColor: "rgb(206, 212, 218)" }}
-          //                      onChange={event => this.changeInput(event)} placeholder="Search summary..."
-          // />)
         },
         {
           Header: "Whiteboard",
@@ -115,8 +118,8 @@ render() {
                              graphApi="failurecount"
             />: <p>{tableFailureMessage}</p>}
 
-            {!tableFailureMessage && bugs ?
-            <GenericTable bugs={bugs.results} columns={columns} name="BUGS" tableApi="failures" ISOfrom={ISOfrom}
+            {!tableFailureMessage && bugsData ?
+            <GenericTable bugs={bugsData} columns={columns} name="BUGS" tableApi="failures" ISOfrom={ISOfrom}
                           ISOto={ISOto} tree={tree} totalPages={bugs.total_pages}trStyling
             /> : <p>{tableFailureMessage}</p>}
         </Container>);
@@ -136,11 +139,13 @@ const mapStateToProps = state => ({
     to: state.dates.to,
     ISOfrom: state.dates.ISOfrom,
     ISOto: state.dates.ISOto,
-    tree: state.mainTree.tree
+    tree: state.mainTree.tree,
+    bugzillaData: state.bugzilla.data,
 });
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
+    fetchFullBugData: (url, name) => dispatch(fetchBugsThenBugzilla(url, name)),
     updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { updateSelectedBugDetails, updateDateRange, updateTreeName } from "./../redux/actions";
+import { bugzillaUrl } from "../constants";
 
 class BugColumn extends React.Component {
     constructor(props) {
@@ -18,7 +19,7 @@ class BugColumn extends React.Component {
     }
 
     updateStateData() {
-        // bugdetailsview inherits certain data from the main view
+        // bugdetailsview inherits data from the main view
         const { data, updateDates, updateTree, updateBugDetails, from, to, ISOfrom, ISOto, tree } = this.props;
         updateBugDetails(data.id, data.summary, "BUG_DETAILS");
         updateTree(tree, "BUG_DETAILS");
@@ -28,14 +29,13 @@ class BugColumn extends React.Component {
     render() {
         const { tree, ISOfrom, ISOto } = this.props;
         const { id } = this.props.data;
-        const bugzillaBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=";
         return (
             <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
                 <span className="text-primary">{id}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
                     <Link onClick={this.updateStateData} to={{ pathname: "/bugdetails", search: `?startday=${ISOfrom}&endday=${ISOto}&tree=${tree}&bug=${id}` }}>
                         details
                     </Link>
-                    <a className="ml-1" target="_blank" href={bugzillaBugUrl + id}>bugzilla</a>
+                    <a className="ml-1" target="_blank" href={`${bugzillaUrl}show_bug.cgi?id=${id}`}>bugzilla</a>
                 </span>
             </div>
         );

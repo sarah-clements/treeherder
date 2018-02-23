@@ -8,6 +8,7 @@ import newrelic.agent
 import requests
 from dateutil import parser
 from django.conf import settings
+from treeherder.model.models import Repository
 
 logger = logging.getLogger(__name__)
 REVISION_SHA_RE = re.compile(r'^[a-f\d]{12,40}$', re.IGNORECASE)
@@ -126,18 +127,26 @@ def to_timestamp(datestr):
     return calendar.timegm(parser.parse(datestr).utctimetuple())
 
 
-def _get_end_of_day(date):
+def get_end_of_day(date):
     new_date = datetime.datetime.strptime(date, '%Y-%m-%d') + datetime.timedelta(days=1, microseconds=-1)
     return new_date.strftime('%Y-%m-%d %H:%M:%S.%f')
 
 
-def _get_tree(param):
+def get_tree(param):
     if param == 'trunk':
         # the repository id's are used instead of name for query efficiency;
         # trunk equals mozilla-central', 'mozilla-inbound', 'autoland', 'fx-team' (in sequence)
         tree = (1, 2, 77, 14)
-    else:
+    elif param == 'autoland':
         tree = [77]
-
-    #     Todo set up a query to retrieve repo id based on name
+    else:
+        try:
+            query = Repository.objects.get(name=param)
+            tree = [query.id]
+    
+        except Repository.DoesNotExist:
+            tree = None
+            print('Repository matching query does not exist')
+    
     return tree
+    

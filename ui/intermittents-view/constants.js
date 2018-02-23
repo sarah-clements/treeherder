@@ -27,3 +27,5 @@ export const graphTwoSpecs = {
     legend: ["Orange Count", "Push Count"],
     legend_target: ".legend"
 };
+
+export const bugzillaUrl = "https://bugzilla.mozilla.org/";

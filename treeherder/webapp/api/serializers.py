@@ -254,10 +254,11 @@ class OptionCollectionSerializer(serializers.ModelSerializer):
 
 
 class FailuresSerializer(serializers.ModelSerializer):
+    bug_count = serializers.IntegerField()
 
     class Meta:
-        model = models.Bugscache
-        fields = ('id', 'status', 'summary', 'whiteboard')
+        model = models.BugJobMap
+        fields = ('bug_id', 'bug_count')
 
 
 class FailuresByBugSerializer(serializers.ModelSerializer):

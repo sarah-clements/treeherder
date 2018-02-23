@@ -1,4 +1,5 @@
 import moment from "moment";
+import { bugzillaUrl } from "./constants";
 
 export const formatDates = (date) => {
     const ISOdate = date.format("YYYY-MM-DD");
@@ -25,6 +26,36 @@ export const apiUrlFormatter = (path, startDay, endDay, tree, bugId, page, searc
     return url;
 };
 
+export const formatBugsForBugzilla = (data) => {
+    let bugs = '';
+    for (let i = 0; i < data.length; i++) {
+        bugs += `${data[i].bug_id},`;
+    }
+    return bugs;
+};
+
+export const mergeBugsData = (data, bugs) => {
+    let dict = {};
+    for (let i = 0; i < data.length; i++) {
+        dict[data[i].bug_id] = data[i].bug_count;
+    }
+
+    for (let i = 0; i < bugs.length; i++) {
+        let match = dict[bugs[i].id];
+        if (match) {
+            bugs[i].count = match;
+        }
+    }
+
+    bugs.sort(function (a, b) {
+        return b.count - a.count;
+    });
+    return { bugsData: bugs };
+};
+
+//bugs can be one bug or a comma separated (no spaces) string of bugs
+export const bugzillaBugsApi = bugs => `${bugzillaUrl}rest/bug?include_fields=id,status,summary,whiteboard&id=${bugs}`;
+
 //TODO - replace localhost path with SERVICE_DOMAIN
 export const logviewerUrl = (tree, treeherderId) => `logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
 
@@ -37,7 +68,7 @@ export const calculateMetrics = (data) => {
     let totalFailures = 0;
     let totalRuns = 0;
 
-    for (var i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++) {
         let failures = data[i].failure_count;
         let testRuns = data[i].test_runs;
         let freq = testRuns < 1 || failures < 1 ? 0 : Math.round(failures/testRuns);

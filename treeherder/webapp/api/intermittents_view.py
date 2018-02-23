@@ -5,8 +5,8 @@ from rest_framework import (generics, views)
 from treeherder.model.models import (Bugscache, BugJobMap, Job, Push)
 from .serializers import (FailuresSerializer, FailuresByBugSerializer, FailureCount)
 from pagination import CustomPagePagination
-from treeherder.etl.common import (_get_end_of_day, _get_tree)
-from treeherder.config.settings import OPTION_COLLECTION_HASH_MAP
+from treeherder.etl.common import (get_end_of_day, get_tree, fetch_json)
+from treeherder.config.settings import OPTION_COLLECTION_HASH_MAP, BZ_API_URL
 
 
 class Failures(generics.ListAPIView):
@@ -17,19 +17,13 @@ class Failures(generics.ListAPIView):
 
     def get_queryset(self):
         startday = self.request.query_params.get('startday').encode('utf-8') + ' 00:00:00'
-        endday = _get_end_of_day(self.request.query_params.get('endday').encode('utf-8'))
-        tree = _get_tree(self.request.query_params.get('tree').encode('utf-8'))
-        search = self.request.query_params.get('search')
+        endday = get_end_of_day(self.request.query_params.get('endday').encode('utf-8'))
+        tree = get_tree(self.request.query_params.get('tree').encode('utf-8'))
 
-        query = Bugscache.objects.filter(modified__range=(startday, endday)).order_by('modified')
+        queryset = BugJobMap.objects.filter(job__repository_id__in=tree, job__push__time__range=(startday, endday),
+                                            job__failure_classification__id=4).select_related('job', 'push')\
+            .values('bug_id').annotate(bug_count=Count('job_id')).values('bug_id', 'bug_count').order_by('-bug_count')
 
-        if search:
-            queryset = query.filter(summary__icontains=search).order_by('modified')
-
-        else:
-            queryset = query.order_by()
-        # queryset = Bugscache.objects.filter(job__push__time__range=(startday, endday), job__repository_id__in=tree).select_related()
-        # count aggregate function
         return queryset
 
 
@@ -41,15 +35,16 @@ class FailuresByBug(generics.ListAPIView):
 
     def get_queryset(self):
         startday = self.request.query_params.get('startday').encode('utf-8') + ' 00:00:00'
-        endday = _get_end_of_day(self.request.query_params.get('endday').encode('utf-8'))
-        tree = _get_tree(self.request.query_params.get('tree').encode('utf-8'))
+        endday = get_end_of_day(self.request.query_params.get('endday').encode('utf-8'))
+        # TODO error handling tree will return None if invalid and raise a ValueError
+        tree = get_tree(self.request.query_params.get('tree').encode('utf-8'))
         bug_id = int(self.request.query_params.get('bug'))
 
         queryset = BugJobMap.objects.select_related('job', 'push').filter(bug_id=bug_id, job__repository_id__in=tree,
                                                                           job__push__time__range=(startday, endday))\
             .values('bug_id', 'job_id', 'job__push__time', 'job__repository__name', 'job__option_collection_hash',
                     'job__signature__job_type_name', 'job__push__revision', 'job__machine_platform__platform')\
-            .order_by('job__push__time')
+            .order_by('-job__push__time')
 
         for item in queryset:
             test_type = item['job__signature__job_type_name']
@@ -69,8 +64,8 @@ class FailureCount(generics.ListAPIView):
 
     def get_queryset(self):
         startday = self.request.query_params.get('startday').encode('utf-8') + ' 00:00:00'
-        endday = _get_end_of_day(self.request.query_params.get('endday').encode('utf-8'))
-        tree = _get_tree(self.request.query_params.get('tree').encode('utf-8'))
+        endday = get_end_of_day(self.request.query_params.get('endday').encode('utf-8'))
+        tree = get_tree(self.request.query_params.get('tree').encode('utf-8'))
         bug_id = self.request.query_params.get('bug')
 
         push_query = Push.objects.filter(repository_id__in=tree, time__range=(startday, endday))\
