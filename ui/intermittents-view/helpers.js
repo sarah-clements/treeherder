@@ -50,7 +50,7 @@ export const mergeBugsData = (data, bugs) => {
     bugs.sort(function (a, b) {
         return b.count - a.count;
     });
-    return { bugsData: bugs };
+    return bugs;
 };
 
 //bugs can be one bug or a comma separated (no spaces) string of bugs

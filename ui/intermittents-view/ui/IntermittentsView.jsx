@@ -12,13 +12,7 @@ import GraphsContainer from "./GraphsContainer";
 class IntermittentsView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-        graphOneData: null,
-        graphTwoData: null,
-        totalFailures: 0,
-        totalRuns: 0,
-        bugsData: null
-    };
+    this.state = {};
     this.updateData = this.updateData.bind(this);
     this.updateStateData = this.updateStateData.bind(this);
 }
@@ -34,15 +28,8 @@ componentDidMount() {
 }
 
 componentWillReceiveProps(nextProps) {
-    const { graphs, history, ISOfrom, ISOto, tree, location, bugs, bugzillaData } = nextProps;
+    const { history, ISOfrom, ISOto, tree, location } = nextProps;
 
-    if (bugzillaData.bugs && bugzillaData.bugs !== this.props.bugzillaData.bugs) {
-        this.setState(mergeBugsData(bugs.results, bugzillaData.bugs));
-    }
-
-    if (graphs.length > 0 && (graphs !== this.props.graphs || !this.state.graphOneData)) {
-        this.setState(calculateMetrics(graphs));
-    }
     //update all data if the user edits dates or tree via the query params
     if (location.search !== this.props.location.search) {
         this.updateStateData(location.search);
@@ -74,8 +61,7 @@ updateData(api, name) {
 }
 
 render() {
-    const { bugs, tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, tree } = this.props;
-    const { graphOneData, graphTwoData, totalFailures, totalRuns, bugsData } = this.state;
+    const { bugs, tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, tree, bugzillaData, graphs } = this.props;
     const columns = [
         {
           Header: "Bug ID",
@@ -97,6 +83,21 @@ render() {
           minWidth: 150
         }
       ];
+
+    let bugsData = null;
+    let graphOneData = null;
+    let graphTwoData = null;
+    let totalFailures = 0;
+    let totalRuns = 0;
+
+    if (bugs.results && bugzillaData.bugs && bugzillaData.bugs.length > 0) {
+       bugsData = mergeBugsData(bugs.results, bugzillaData.bugs);
+    }
+
+    if (graphs && graphs.length > 0) {
+        ({ graphOneData, graphTwoData, totalFailures, totalRuns } = calculateMetrics(graphs));
+    }
+
     return (
         <Container fluid style={{ marginBottom: ".5rem", marginTop: "5rem", maxWidth: "1200px" }}>
             <Navigation name="BUGS" graphName="BUGS_GRAPHS" ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failures"
@@ -120,7 +121,7 @@ render() {
 
             {!tableFailureMessage && bugsData ?
             <GenericTable bugs={bugsData} columns={columns} name="BUGS" tableApi="failures" ISOfrom={ISOfrom}
-                          ISOto={ISOto} tree={tree} totalPages={bugs.total_pages}trStyling
+                          ISOto={ISOto} tree={tree} totalPages={bugs.total_pages} trStyling
             /> : <p>{tableFailureMessage}</p>}
         </Container>);
     }

@@ -19,7 +19,8 @@ class GenericTable extends React.Component {
     refreshTable(state) {
         // table's page count starts at 0
         const page = state.page + 1;
-        this.updateData(page);
+        console.log(page);
+        // this.updateData(page);
     }
 
     updateData(page) {
@@ -45,7 +46,8 @@ class GenericTable extends React.Component {
     }
 
     render() {
-        let { bugs, columns, trStyling, totalPages } = this.props;
+        let { bugs, columns, trStyling, totalPages, updateTable } = this.props;
+        console.log(updateTable);
         //if dynamic table row styling based on bug status/whiteboard is not needed, pass the trStyling prop a false bool
         return (
             <ReactTable
