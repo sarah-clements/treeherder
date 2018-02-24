@@ -2,9 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Collapse, Navbar, Nav, UncontrolledDropdown, DropdownToggle } from "reactstrap";
-import { updateTreeName, fetchBugData } from "./../redux/actions";
-import { apiUrlFormatter } from "../helpers";
+import { updateTreeName, fetchBugData, fetchBugsThenBugzilla } from "./../redux/actions";
+import { createApiUrl } from "../helpers";
 import DropdownMenuItems from "./DropdownMenuItems";
+import { treeherderDomain } from "../constants";
 
 class Navigation extends React.Component {
     constructor(props) {
@@ -19,11 +20,15 @@ class Navigation extends React.Component {
         this.setState({ isOpen: !this.state.isOpen });
     }
 
-
     updateData(tree) {
-        const { fetchData, updateTree, name, graphName, ISOfrom, ISOto, tableApi, graphApi, bugId } = this.props;
-        fetchData(apiUrlFormatter(tableApi, ISOfrom, ISOto, tree, bugId), name);
-        fetchData(apiUrlFormatter(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
+        const { updateTree, fetchData, fetchFullBugData, name, graphName, params, bugId, tableApi, graphApi } = this.props;
+        params.tree = tree;
+        if (bugId) {
+            fetchData(createApiUrl(treeherderDomain, tableApi, params), name);
+        } else {
+            fetchFullBugData(createApiUrl(treeherderDomain, tableApi, params), name);
+        }
+        fetchData(createApiUrl(treeherderDomain, graphApi, params), graphName);
         updateTree(tree, name);
     }
 
@@ -55,7 +60,8 @@ Nav.propTypes = {
 
 const mapDispatchToProps = dispatch => ({
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name)),
-    fetchData: (url, name) => dispatch(fetchBugData(url, name))
+    fetchData: (url, name) => dispatch(fetchBugData(url, name)),
+    fetchFullBugData: (url, name) => dispatch(fetchBugsThenBugzilla(url, name))
 });
 
 export default connect(null, mapDispatchToProps)(Navigation);

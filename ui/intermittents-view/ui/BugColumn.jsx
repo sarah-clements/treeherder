@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { updateSelectedBugDetails, updateDateRange, updateTreeName } from "./../redux/actions";
-import { bugzillaUrl } from "../constants";
+import { bugzillaBugsApi } from "../helpers";
 
 class BugColumn extends React.Component {
     constructor(props) {
@@ -21,7 +21,7 @@ class BugColumn extends React.Component {
     updateStateData() {
         // bugdetailsview inherits data from the main view
         const { data, updateDates, updateTree, updateBugDetails, from, to, ISOfrom, ISOto, tree } = this.props;
-        updateBugDetails(data.id, data.summary, "BUG_DETAILS");
+        updateBugDetails(data.id, data.summary, data.count, "BUG_DETAILS");
         updateTree(tree, "BUG_DETAILS");
         updateDates(from, to, ISOfrom, ISOto, "BUG_DETAILS");
     }
@@ -35,7 +35,7 @@ class BugColumn extends React.Component {
                     <Link onClick={this.updateStateData} to={{ pathname: "/bugdetails", search: `?startday=${ISOfrom}&endday=${ISOto}&tree=${tree}&bug=${id}` }}>
                         details
                     </Link>
-                    <a className="ml-1" target="_blank" href={`${bugzillaUrl}show_bug.cgi?id=${id}`}>bugzilla</a>
+                    <a className="ml-1" target="_blank" href={bugzillaBugsApi("bugshow_bug.cgi", { id })}>bugzilla</a>
                 </span>
             </div>
         );
@@ -51,7 +51,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    updateBugDetails: (bugId, summary, name) => dispatch(updateSelectedBugDetails(bugId, summary, name)),
+    updateBugDetails: (bugId, summary, bugCount, name) => dispatch(updateSelectedBugDetails(bugId, summary, bugCount, name)),
     updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });

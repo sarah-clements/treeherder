@@ -6,24 +6,25 @@ import Navigation from "./Navigation";
 import GenericTable from "./GenericTable";
 import { fetchBugData, updateTreeName, updateDateRange, fetchBugsThenBugzilla } from "./../redux/actions";
 import BugColumn from "./BugColumn";
-import { apiUrlFormatter, calculateMetrics, mergeBugsData, parseUrlParams, updateUrlParams } from "../helpers";
+import { createApiUrl, calculateMetrics, mergeBugsData, parseQueryParams, createQueryParams } from "../helpers";
 import GraphsContainer from "./GraphsContainer";
+import { treeherderDomain, bugsEndpoint, graphsEndpoint } from "../constants";
 
 class IntermittentsView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
     this.updateData = this.updateData.bind(this);
-    this.updateStateData = this.updateStateData.bind(this);
+    // this.updateTable = this.updateTable.bind(this);
 }
 
 componentDidMount() {
-    const { graphs, bugs, ISOfrom, ISOto, tree, fetchFullBugData } = this.props;
+    const { graphs, ISOfrom, ISOto, tree, fetchData, bugs, fetchFullBugData } = this.props;
     if (!graphs.results) {
-        this.updateData("failurecount", "BUGS_GRAPHS");
+        fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS_GRAPHS");
     }
     if (!bugs.results) {
-        fetchFullBugData(apiUrlFormatter("failures", ISOfrom, ISOto, tree), "BUGS");
+        fetchFullBugData(createApiUrl(treeherderDomain, bugsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS");
     }
 }
 
@@ -32,32 +33,27 @@ componentWillReceiveProps(nextProps) {
 
     //update all data if the user edits dates or tree via the query params
     if (location.search !== this.props.location.search) {
-        this.updateStateData(location.search);
+        this.updateData(location.search);
     }
     //update query params in the address bar if dates or tree are updated via the UI
     if (ISOfrom !== this.props.ISOfrom || ISOto !== this.props.ISOto || tree !== this.props.tree) {
-        const queryParams = updateUrlParams(ISOfrom, ISOto, tree);
+        const queryParams = createQueryParams({ startday: ISOfrom, endday: ISOto, tree });
 
         if (queryParams !== history.location.search) {
             history.replace(`/main${queryParams}`);
-            //we do this so api's won't be called twice (because location.search will update)
+            //we do this so api's won't be called twice (because location.search will trigger this lifecycle hook)
             this.props.location.search = queryParams;
         }
     }
 }
 
-updateStateData(params) {
-    const [from, to, ISOfrom, ISOto, tree] = parseUrlParams(params);
+updateData(params) {
+    const [from, to, ISOfrom, ISOto, tree] = parseQueryParams(params);
     const { updateTree, updateDates, fetchData, fetchFullBugData } = this.props;
     updateDates(from, to, ISOfrom, ISOto, "BUGS");
     updateTree(tree, "BUGS");
-    fetchData(apiUrlFormatter("failurecount", ISOfrom, ISOto, tree), "BUGS_GRAPHS");
-    fetchFullBugData(apiUrlFormatter("failures", ISOfrom, ISOto, tree), "BUGS");
-}
-
-updateData(api, name) {
-    const { fetchData, ISOfrom, ISOto, tree } = this.props;
-    fetchData(apiUrlFormatter(api, ISOfrom, ISOto, tree), name);
+    fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS_GRAPHS");
+    fetchFullBugData(createApiUrl(treeherderDomain, bugsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS");
 }
 
 render() {
@@ -84,7 +80,7 @@ render() {
         }
       ];
 
-    let bugsData = null;
+    let bugsData = [];
     let graphOneData = null;
     let graphTwoData = null;
     let totalFailures = 0;
@@ -98,10 +94,12 @@ render() {
         ({ graphOneData, graphTwoData, totalFailures, totalRuns } = calculateMetrics(graphs));
     }
 
+    const params = { startday: ISOfrom, endday: ISOto, tree };
+
     return (
-        <Container fluid style={{ marginBottom: ".5rem", marginTop: "5rem", maxWidth: "1200px" }}>
-            <Navigation name="BUGS" graphName="BUGS_GRAPHS" ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failures"
-                        graphApi="failurecount" tree={tree}
+        <Container fluid style={{ marginBottom: "5rem", marginTop: "5rem", maxWidth: "1200px" }}>
+            <Navigation name="BUGS" graphName="BUGS_GRAPHS" tableApi={bugsEndpoint} params={params}
+                        graphApi={graphsEndpoint} tree={tree}
             />
             <Row>
                 <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
@@ -114,14 +112,13 @@ render() {
             </Row>
 
             {!graphFailureMessage && graphOneData && graphTwoData ?
-            <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} name="BUGS" tree={tree}
-                             graphName="BUGS_GRAPHS" ISOfrom={ISOfrom} ISOto={ISOto} tableApi="failures"
-                             graphApi="failurecount"
+            <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} name="BUGS" params={params}
+                             graphName="BUGS_GRAPHS" tableApi={bugsEndpoint} graphApi={graphsEndpoint} tree={tree}
             />: <p>{tableFailureMessage}</p>}
 
-            {!tableFailureMessage && bugsData ?
-            <GenericTable bugs={bugsData} columns={columns} name="BUGS" tableApi="failures" ISOfrom={ISOfrom}
-                          ISOto={ISOto} tree={tree} totalPages={bugs.total_pages} trStyling
+            {!tableFailureMessage ?
+            <GenericTable bugs={bugsData} columns={columns} name="BUGS" tableApi={bugsEndpoint} params={params}
+                          totalPages={bugs.total_pages} trStyling updateTable={this.updateTable}
             /> : <p>{tableFailureMessage}</p>}
         </Container>);
     }

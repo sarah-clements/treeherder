@@ -28,4 +28,13 @@ export const graphTwoSpecs = {
     legend_target: ".legend"
 };
 
-export const bugzillaUrl = "https://bugzilla.mozilla.org/";
+export const bugzillaDomain = "https://bugzilla.mozilla.org/";
+
+//TODO - use SERVICE_DOMAIN in production
+export const treeherderDomain = "http://localhost:8000/";
+
+export const bugsEndpoint = "api/failures/";
+
+export const bugDetailsEndpoint = "api/failuresbybug/";
+
+export const graphsEndpoint = "api/failurecount/";

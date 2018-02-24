@@ -1,5 +1,5 @@
 import moment from "moment";
-import { bugzillaUrl } from "./constants";
+import { bugzillaDomain } from "./constants";
 
 export const formatDates = (date) => {
     const ISOdate = date.format("YYYY-MM-DD");
@@ -7,23 +7,40 @@ export const formatDates = (date) => {
     return [ISOdate, prettyDate];
 };
 
-//TODO - replace localhost path with SERVICE_DOMAIN
-export const apiUrlFormatter = (path, startDay, endDay, tree, bugId, page, search) => {
-    let url = `http://localhost:8000/api/${path}/?startday=${startDay}&endday=${endDay}&tree=${tree}`;
+export const createApiUrl = (domain, endpoint, params) => {
+    const query = createQueryParams(params);
+    return `${domain}${endpoint}${query}`;
+};
 
+//bugs can be one bug or a comma separated (no spaces) string of bugs
+export const bugzillaBugsApi = (endpoint, params) => {
+    const query = createQueryParams(params);
+   return `${bugzillaDomain}${endpoint}${query}`;
+};
+
+export const logviewerUrl = (tree, treeherderId) => `logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
+
+export const jobsUrl = (tree, revision) => `http://localhost:8000/#/jobs?repo=${tree}&revision=${revision}`;
+
+export const parseQueryParams = (search) => {
+    const params = new URLSearchParams(search);
+    const ISOfrom = params.get("startday");
+    const ISOto = params.get("endday");
+    const from = moment(ISOfrom).format("ddd MMM D, YYYY");
+    const to = moment(ISOto).format("ddd MMM D, YYYY");
+    const bugId = params.get("bug");
     if (bugId) {
-        url += `&bug=${bugId}`;
+        return [from, to, ISOfrom, ISOto, params.get("tree"), bugId];
     }
+    return [from, to, ISOfrom, ISOto, params.get("tree")];
+};
 
-    if (page) {
-        url += `&page=${page}`;
+export const createQueryParams = (params) => {
+    let query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+        query.set(key, value);
     }
-
-    if (search) {
-        url += `&search=${search}`;
-    }
-
-    return url;
+    return `?${query.toString()}`;
 };
 
 export const formatBugsForBugzilla = (data) => {
@@ -53,14 +70,6 @@ export const mergeBugsData = (data, bugs) => {
     return bugs;
 };
 
-//bugs can be one bug or a comma separated (no spaces) string of bugs
-export const bugzillaBugsApi = bugs => `${bugzillaUrl}rest/bug?include_fields=id,status,summary,whiteboard&id=${bugs}`;
-
-//TODO - replace localhost path with SERVICE_DOMAIN
-export const logviewerUrl = (tree, treeherderId) => `logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
-
-export const jobsUrl = (tree, revision) => `http://localhost:8000/#/jobs?repo=${tree}&revision=${revision}`;
-
 export const calculateMetrics = (data) => {
     let dateCounts = [];
     let dateTestRunCounts = [];
@@ -83,28 +92,4 @@ export const calculateMetrics = (data) => {
         dateFreqs.push({ date, value: freq });
     }
     return { graphOneData: dateFreqs, graphTwoData: [dateCounts, dateTestRunCounts], totalFailures, totalRuns };
-};
-
-export const parseUrlParams = (search) => {
-    const params = new URLSearchParams(search);
-    const ISOfrom = params.get("startday");
-    const ISOto = params.get("endday");
-    const from = moment(ISOfrom).format("ddd MMM D, YYYY");
-    const to = moment(ISOto).format("ddd MMM D, YYYY");
-    const bugId = params.get("bug");
-    if (bugId) {
-        return [from, to, ISOfrom, ISOto, params.get("tree"), bugId];
-    }
-    return [from, to, ISOfrom, ISOto, params.get("tree")];
-};
-
-export const updateUrlParams = (ISOfrom, ISOto, tree, bugId) => {
-    let params = new URLSearchParams();
-    params.set("startday", ISOfrom);
-    params.set("endday", ISOto);
-    params.set("tree", tree);
-    if (bugId) {
-        params.set("bug", bugId);
-    }
-    return `?${params.toString()}`;
 };

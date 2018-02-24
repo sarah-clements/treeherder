@@ -14,10 +14,9 @@ export const fetchBugsThenBugzilla = (url, name) => (dispatch, getState) => (
     ).then(() => {
         const { results } = getState().bugsData.data;
         const bugs_list = formatBugsForBugzilla(results);
-        return dispatch(fetchBugData(bugzillaBugsApi(bugs_list), "BUGZILLA"));
+        return dispatch(fetchBugData(bugzillaBugsApi("rest/bug", { include_fields: "id,status,summary,whiteboard", id: bugs_list }), "BUGZILLA"));
     })
 );
-
 
 //action creators
 // export const requestBugData = () => ({
@@ -48,8 +47,9 @@ export const updateTreeName = (tree, name) => ({
     tree
 });
 
-export const updateSelectedBugDetails = (bugId, summary, name) => ({
+export const updateSelectedBugDetails = (bugId, summary, bugCount, name) => ({
     type: `UPDATE_SELECTED_${name}`,
     bugId,
-    summary
+    summary,
+    bugCount
 });
