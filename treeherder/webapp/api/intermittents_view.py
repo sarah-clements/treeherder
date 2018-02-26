@@ -1,12 +1,12 @@
 import re
 from django.db.models import Count
 from django.db.models.functions import TruncDate
-from rest_framework import (generics, views)
-from treeherder.model.models import (Bugscache, BugJobMap, Job, Push)
+from rest_framework import generics
+from treeherder.model.models import (BugJobMap, Job, Push)
 from .serializers import (FailuresSerializer, FailuresByBugSerializer, FailureCount)
 from pagination import CustomPagePagination
-from treeherder.etl.common import (get_end_of_day, get_tree, fetch_json)
-from treeherder.config.settings import OPTION_COLLECTION_HASH_MAP, BZ_API_URL
+from treeherder.etl.common import (get_end_of_day, get_tree)
+from treeherder.config.settings import OPTION_COLLECTION_HASH_MAP
 
 
 class Failures(generics.ListAPIView):
@@ -21,14 +21,14 @@ class Failures(generics.ListAPIView):
         tree = get_tree(self.request.query_params.get('tree').encode('utf-8'))
 
         queryset = BugJobMap.objects.filter(job__repository_id__in=tree, job__push__time__range=(startday, endday),
-                                            job__failure_classification__id=4).select_related('job', 'push')\
+                                            job__failure_classification__id=4).select_related('push')\
             .values('bug_id').annotate(bug_count=Count('job_id')).values('bug_id', 'bug_count').order_by('-bug_count')
 
         return queryset
 
 
 class FailuresByBug(generics.ListAPIView):
-    """ List of intermittent failure details by bug, date range and tree (project name) """
+    """ List of intermittent failure job details by bug, date range and tree (project name) """
 
     serializer_class = FailuresByBugSerializer
     pagination_class = CustomPagePagination
@@ -36,7 +36,6 @@ class FailuresByBug(generics.ListAPIView):
     def get_queryset(self):
         startday = self.request.query_params.get('startday').encode('utf-8') + ' 00:00:00'
         endday = get_end_of_day(self.request.query_params.get('endday').encode('utf-8'))
-        # TODO error handling tree will return None if invalid and raise a ValueError
         tree = get_tree(self.request.query_params.get('tree').encode('utf-8'))
         bug_id = int(self.request.query_params.get('bug'))
 

@@ -46,13 +46,13 @@ componentWillReceiveProps(nextProps) {
 
 updateData(query) {
     const [from, to, ISOfrom, ISOto, tree, bugId] = parseQueryParams(query);
-    const { updateTree, updateDates, fetchData, updateBugDetails } = this.props;
+    const { updateTree, updateDates, fetchData, updateBugDetails, summary, bugCount } = this.props;
     const params = { startday: ISOfrom, endday: ISOto, tree, bug: bugId };
 
     updateDates(from, to, ISOfrom, ISOto, "BUG_DETAILS");
     updateTree(tree, "BUG_DETAILS");
     // Todo fetch summary from bugzilla
-    updateBugDetails(bugId, "", null, "BUG_DETAILS");
+    updateBugDetails(bugId, summary, bugCount, "BUG_DETAILS");
     fetchData(createApiUrl(treeherderDomain, graphsEndpoint, params), "BUG_DETAILS_GRAPHS");
     fetchData(createApiUrl(treeherderDomain, bugDetailsEndpoint, params), "BUG_DETAILS");
 }
@@ -115,12 +115,14 @@ render() {
             <Row>
                 <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to} UTC`}</p></Col>
             </Row>
+            {summary &&
             <Row>
                 <Col xs="4" className="mx-auto"><p className="text-secondary text-center">{summary}</p></Col>
-            </Row>
+            </Row>}
+            {bugCount &&
             <Row>
                 <Col xs="12" className="mx-auto"><p className="text-secondary">{bugCount} total failures</p></Col>
-            </Row>
+            </Row>}
 
             {!graphFailureMessage && graphOneData && graphTwoData ?
             <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} name="BUG_DETAILS" tree={tree}
