@@ -35,7 +35,7 @@ class BugColumn extends React.Component {
                     <Link onClick={this.updateStateData} to={{ pathname: "/bugdetails", search: `?startday=${from}&endday=${to}&tree=${tree}&bug=${id}` }}>
                         details
                     </Link>
-                    <a className="ml-1" target="_blank" href={bugzillaBugsApi("bugshow_bug.cgi", { id })}>bugzilla</a>
+                    <a className="ml-1" target="_blank" href={bugzillaBugsApi("show_bug.cgi", { id })}>bugzilla</a>
                 </span>
             </div>
         );

@@ -8,32 +8,24 @@ import { fetchBugData, fetchBugsThenBugzilla } from "../redux/actions";
 import { treeherderDomain } from "../constants";
 import { createApiUrl } from "../helpers";
 
-class GenericTable extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {};
-        this.updateData = this.updateData.bind(this);
-        this.updateTable = this.updateTable.bind(this);
-    }
+const GenericTable = ({ fetchData, fetchFullBugData, name, params, bugId, tableApi, bugs, columns, trStyling, totalPages }) => {
 
-    updateTable(state) {
+    const updateTable = (state) => {
         // table's page count starts at 0
         const page = state.page + 1;
-        this.updateData(page);
-    }
+        updateData(page);
+    };
 
-    updateData(page) {
-        const { fetchData, fetchFullBugData, name, params, bugId, tableApi } = this.props;
+    const updateData = (page) => {
         params.page = page;
-
         if (bugId) {
             fetchData(createApiUrl(treeherderDomain, tableApi, params), name);
         } else {
             fetchFullBugData(createApiUrl(treeherderDomain, tableApi, params), name);
         }
-    }
+    };
 
-    bugRowStyling(state, bug) {
+    const bugRowStyling = (state, bug) => {
         if (bug) {
             let style = { color: "#aaa" };
 
@@ -48,25 +40,21 @@ class GenericTable extends React.Component {
             }
         }
         return {};
-    }
-
-    render() {
-        let { bugs, columns, trStyling, totalPages } = this.props;
-        //if dynamic table row styling based on bug status/whiteboard is not needed, pass the trStyling prop a false bool
-        return (
-            <ReactTable
-                        manual
-                        data={bugs}
-                        onFetchData={this.updateTable}
-                        pages={totalPages}
-                        showPageSizeOptions={false}
-                        columns={columns}
-                        className="-striped"
-                        getTrProps={trStyling ? this.bugRowStyling : () => ({})}
-            />
-        );
-    }
-}
+    };
+    //if dynamic table row styling based on bug status/whiteboard is not needed, pass the trStyling prop a false bool
+    return (
+        <ReactTable
+                    manual
+                    data={bugs}
+                    onFetchData={updateTable}
+                    pages={totalPages}
+                    showPageSizeOptions={false}
+                    columns={columns}
+                    className="-striped"
+                    getTrProps={trStyling ? bugRowStyling : () => ({})}
+        />
+    );
+};
 
 Table.propTypes = {
     bordered: PropTypes.bool,

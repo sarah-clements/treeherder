@@ -18,12 +18,6 @@ export const fetchBugsThenBugzilla = (url, name) => (dispatch, getState) => (
     })
 );
 
-//action creators
-// export const requestBugData = () => ({
-//     type: "REQUEST_BUGS_DATA",
-//     spinner: true
-// });
-
 export const fetchBugDataSuccess = (data, name) => ({
     type: `FETCH_${name}_SUCCESS`,
     data: data

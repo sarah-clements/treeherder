@@ -1,7 +1,7 @@
 import moment from "moment";
 import { bugzillaDomain } from "./constants";
 
-//be sure to wrap date in a moment()
+//be sure to wrap date arg in a moment()
 export const ISODate = date => date.format("YYYY-MM-DD");
 
 export const prettyDate = date => moment(date).format("ddd MMM D, YYYY");
@@ -9,7 +9,6 @@ export const prettyDate = date => moment(date).format("ddd MMM D, YYYY");
 export const setDateRange = (day, numDays) => {
     const to = ISODate(day);
     const from = ISODate(day.subtract(numDays, "days"));
-    console.log(from, to);
     return { from, to };
 };
 
@@ -30,20 +29,15 @@ export const jobsUrl = (tree, revision) => `http://localhost:8000/#/jobs?repo=${
 
 export const parseQueryParams = (search) => {
     const params = new URLSearchParams(search);
-    const from = params.get("startday");
-    const to = params.get("endday");
-    const bugId = params.get("bug");
-    if (bugId) {
-        return [from, to, params.get("tree"), bugId];
+    let obj = {};
+    for (const [key, value] of params.entries()) {
+        obj[key] = value;
     }
-    return [from, to, params.get("tree")];
+    return obj;
 };
 
 export const createQueryParams = (params) => {
-    let query = new URLSearchParams();
-    for (const [key, value] of Object.entries(params)) {
-        query.set(key, value);
-    }
+    let query = new URLSearchParams(params);
     return `?${query.toString()}`;
 };
 
@@ -85,7 +79,6 @@ export const calculateMetrics = (data) => {
         let failures = data[i].failure_count;
         let testRuns = data[i].test_runs;
         let freq = testRuns < 1 || failures < 1 ? 0 : Math.round(failures/testRuns);
-        // let freq = testRuns < 1 ? 0 : ().toFixed(2);
         // need to convert a date to Date object because metrics graphics only accepts JS Date objects
         let date = moment(data[i].date).toDate();
 

@@ -38,23 +38,23 @@ componentWillReceiveProps(nextProps) {
 
         if (queryParams !== history.location.search) {
             history.replace(`/bugdetails${queryParams}`);
-            //we do this so api's won't be called twice (because location.search will update)
+            //we do this so the api's won't be called twice (location/history updates will trigger this lifecycle hook)
             this.props.location.search = queryParams;
         }
     }
 }
 
 updateData(query) {
-    const [from, to, tree, bugId] = parseQueryParams(query);
+    const { startday, endday, tree, bug } = parseQueryParams(query);
     const { updateTree, updateDates, fetchData, updateBugDetails, summary, bugCount } = this.props;
-    const params = { startday: from, endday: to, tree, bug: bugId };
-
-    updateDates(from, to, "BUG_DETAILS");
+    const params = { startday, endday, tree, bug };
+    updateDates(startday, endday, "BUG_DETAILS");
     updateTree(tree, "BUG_DETAILS");
-    // Todo fetch summary from bugzilla
-    updateBugDetails(bugId, summary, bugCount, "BUG_DETAILS");
     fetchData(createApiUrl(treeherderDomain, graphsEndpoint, params), "BUG_DETAILS_GRAPHS");
     fetchData(createApiUrl(treeherderDomain, bugDetailsEndpoint, params), "BUG_DETAILS");
+
+    // Todo fetch summary from bugzilla
+    updateBugDetails(bug, summary, bugCount, "BUG_DETAILS");
 }
 
 render() {

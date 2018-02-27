@@ -18,7 +18,7 @@ class IntermittentsView extends React.Component {
 }
 
 componentDidMount() {
-    const { graphs, from, to, tree, fetchData, bugs, fetchFullBugData } = this.props;
+    const { graphs, from, to, tree, fetchData } = this.props;
     if (!graphs.results) {
         fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: from, endday: to, tree }), "BUGS_GRAPHS");
     }
@@ -37,19 +37,19 @@ componentWillReceiveProps(nextProps) {
 
         if (queryParams !== history.location.search) {
             history.replace(`/main${queryParams}`);
-            //we do this so api's won't be called twice (because location.search will trigger this lifecycle hook)
+            //we do this so the api's won't be called twice (location/history updates will trigger this lifecycle hook)
             this.props.location.search = queryParams;
         }
     }
 }
 
 updateData(params) {
-    const [from, to, tree] = parseQueryParams(params);
+    const { startday, endday, tree } = parseQueryParams(params);
     const { updateTree, updateDates, fetchData, fetchFullBugData } = this.props;
-    updateDates(from, to, "BUGS");
+    updateDates(startday, endday, "BUGS");
     updateTree(tree, "BUGS");
-    fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: from, endday: to, tree }), "BUGS_GRAPHS");
-    fetchFullBugData(createApiUrl(treeherderDomain, bugsEndpoint, { startday: from, endday: to, tree }), "BUGS");
+    fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday, endday, tree }), "BUGS_GRAPHS");
+    fetchFullBugData(createApiUrl(treeherderDomain, bugsEndpoint, { startday, endday, tree }), "BUGS");
 }
 
 render() {
@@ -63,6 +63,7 @@ render() {
         {
           Header: "Count",
           accessor: "count",
+          maxWidth: 100,
         },
         {
           Header: "Summary",
