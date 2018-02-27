@@ -6,7 +6,7 @@ import Navigation from "./Navigation";
 import GenericTable from "./GenericTable";
 import { fetchBugData, updateTreeName, updateDateRange, fetchBugsThenBugzilla } from "./../redux/actions";
 import BugColumn from "./BugColumn";
-import { createApiUrl, calculateMetrics, mergeBugsData, parseQueryParams, createQueryParams } from "../helpers";
+import { createApiUrl, calculateMetrics, mergeBugsData, parseQueryParams, createQueryParams, prettyDate } from "../helpers";
 import GraphsContainer from "./GraphsContainer";
 import { treeherderDomain, bugsEndpoint, graphsEndpoint } from "../constants";
 
@@ -15,29 +15,25 @@ class IntermittentsView extends React.Component {
     super(props);
     this.state = {};
     this.updateData = this.updateData.bind(this);
-    // this.updateTable = this.updateTable.bind(this);
 }
 
 componentDidMount() {
-    const { graphs, ISOfrom, ISOto, tree, fetchData, bugs, fetchFullBugData } = this.props;
+    const { graphs, from, to, tree, fetchData, bugs, fetchFullBugData } = this.props;
     if (!graphs.results) {
-        fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS_GRAPHS");
-    }
-    if (!bugs.results) {
-        fetchFullBugData(createApiUrl(treeherderDomain, bugsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS");
+        fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: from, endday: to, tree }), "BUGS_GRAPHS");
     }
 }
 
 componentWillReceiveProps(nextProps) {
-    const { history, ISOfrom, ISOto, tree, location } = nextProps;
+    const { history, from, to, tree, location } = nextProps;
 
     //update all data if the user edits dates or tree via the query params
     if (location.search !== this.props.location.search) {
         this.updateData(location.search);
     }
     //update query params in the address bar if dates or tree are updated via the UI
-    if (ISOfrom !== this.props.ISOfrom || ISOto !== this.props.ISOto || tree !== this.props.tree) {
-        const queryParams = createQueryParams({ startday: ISOfrom, endday: ISOto, tree });
+    if (from !== this.props.from || to !== this.props.to || tree !== this.props.tree) {
+        const queryParams = createQueryParams({ startday: from, endday: to, tree });
 
         if (queryParams !== history.location.search) {
             history.replace(`/main${queryParams}`);
@@ -48,16 +44,16 @@ componentWillReceiveProps(nextProps) {
 }
 
 updateData(params) {
-    const [from, to, ISOfrom, ISOto, tree] = parseQueryParams(params);
+    const [from, to, tree] = parseQueryParams(params);
     const { updateTree, updateDates, fetchData, fetchFullBugData } = this.props;
-    updateDates(from, to, ISOfrom, ISOto, "BUGS");
+    updateDates(from, to, "BUGS");
     updateTree(tree, "BUGS");
-    fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS_GRAPHS");
-    fetchFullBugData(createApiUrl(treeherderDomain, bugsEndpoint, { startday: ISOfrom, endday: ISOto, tree }), "BUGS");
+    fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: from, endday: to, tree }), "BUGS_GRAPHS");
+    fetchFullBugData(createApiUrl(treeherderDomain, bugsEndpoint, { startday: from, endday: to, tree }), "BUGS");
 }
 
 render() {
-    const { bugs, tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, tree, bugzillaData, graphs } = this.props;
+    const { bugs, tableFailureMessage, graphFailureMessage, from, to, tree, bugzillaData, graphs } = this.props;
     const columns = [
         {
           Header: "Bug ID",
@@ -94,7 +90,7 @@ render() {
         ({ graphOneData, graphTwoData, totalFailures, totalRuns } = calculateMetrics(graphs));
     }
 
-    const params = { startday: ISOfrom, endday: ISOto, tree };
+    const params = { startday: from, endday: to, tree };
 
     return (
         <Container fluid style={{ marginBottom: "5rem", marginTop: "5rem", maxWidth: "1200px" }}>
@@ -105,7 +101,7 @@ render() {
                 <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
             </Row>
             <Row>
-                <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to} UTC`}</p></Col>
+                <Col xs="12" className="mx-auto"><p className="subheader">{`${prettyDate(from)} to ${prettyDate(to)} UTC`}</p></Col>
             </Row>
             <Row>
                 <Col xs="12" className="mx-auto"><p className="text-secondary">{totalFailures} bugs in {totalRuns} pushes</p></Col>
@@ -135,8 +131,6 @@ const mapStateToProps = state => ({
     graphsFailureMessage: state.bugsGraphData.message,
     from: state.dates.from,
     to: state.dates.to,
-    ISOfrom: state.dates.ISOfrom,
-    ISOto: state.dates.ISOto,
     tree: state.mainTree.tree,
     bugzillaData: state.bugzilla.data,
 });
@@ -144,7 +138,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
     fetchFullBugData: (url, name) => dispatch(fetchBugsThenBugzilla(url, name)),
-    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });
 

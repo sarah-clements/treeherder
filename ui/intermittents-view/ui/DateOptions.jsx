@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import moment from "moment";
 import DateRangePicker from "./DateRangePicker";
 import { fetchBugData, updateDateRange, fetchBugsThenBugzilla } from "./../redux/actions";
-import { formatDates, createApiUrl } from "../helpers";
+import { setDateRange, createApiUrl } from "../helpers";
 import DropdownMenuItems from "./DropdownMenuItems";
 import { treeherderDomain } from "../constants";
 
@@ -44,11 +44,9 @@ class DateOptions extends React.Component {
     }
 
     updateData(fromDate) {
-        const today = moment().utc();
         const { fetchData, fetchFullBugData, updateDates, name, graphName, tree, tableApi, graphApi, bugId } = this.props;
-        const [ISOto, to] = formatDates(today);
-        const [ISOfrom, from] = formatDates(today.subtract(fromDate, "days"));
-        const params = { startday: ISOfrom, endday: ISOto, tree };
+        const { from, to } = setDateRange(moment().utc(), fromDate);
+        const params = { startday: from, endday: to, tree };
 
         if (bugId) {
             params.bug = bugId;
@@ -57,18 +55,8 @@ class DateOptions extends React.Component {
             fetchFullBugData(createApiUrl(treeherderDomain, tableApi, params), name);
         }
         fetchData(createApiUrl(treeherderDomain, graphApi, params), graphName);
-        updateDates(from, to, ISOfrom, ISOto, name);
+        updateDates(from, to, name);
     }
-
-    // updateData(fromDate) {
-    //     const today = moment().utc();
-    //     const { fetchData, updateDates, name, graphName, tree, tableApi, graphApi, bugId } = this.props;
-    //     const [ISOto, to] = formatDates(today);
-    //     const [ISOfrom, from] = formatDates(today.subtract(fromDate, "days"));
-    //     fetchData(createApiUrl(tableApi, ISOfrom, ISOto, tree, bugId), name);
-    //     fetchData(createApiUrl(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
-    //     updateDates(from, to, ISOfrom, ISOto, name);
-    // }
 
     render() {
         const { name, graphName, tree, tableApi, graphApi, bugId } = this.props;
@@ -95,7 +83,7 @@ class DateOptions extends React.Component {
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
     fetchFullBugData: (url, name) => dispatch(fetchBugsThenBugzilla(url, name)),
-    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
 });
 
 export default connect(null, mapDispatchToProps)(DateOptions);

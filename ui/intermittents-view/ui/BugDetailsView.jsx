@@ -8,7 +8,7 @@ import Navigation from "./Navigation";
 import { fetchBugData, updateDateRange, updateTreeName, updateSelectedBugDetails } from "./../redux/actions";
 import GenericTable from "./GenericTable";
 import GraphsContainer from "./GraphsContainer";
-import { calculateMetrics, jobsUrl, createApiUrl, logviewerUrl, parseQueryParams, createQueryParams } from "../helpers";
+import { calculateMetrics, jobsUrl, createApiUrl, logviewerUrl, parseQueryParams, createQueryParams, prettyDate } from "../helpers";
 import { bugDetailsEndpoint, graphsEndpoint, treeherderDomain } from "../constants";
 
 class BugDetailsView extends React.Component {
@@ -19,12 +19,12 @@ class BugDetailsView extends React.Component {
 }
 
 componentDidMount() {
-    const { fetchData, ISOfrom, ISOto, tree, bugId } = this.props;
-    fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: ISOfrom, endday: ISOto, tree, bug: bugId }), "BUG_DETAILS_GRAPHS");
+    const { fetchData, from, to, tree, bugId } = this.props;
+    fetchData(createApiUrl(treeherderDomain, graphsEndpoint, { startday: from, endday: to, tree, bug: bugId }), "BUG_DETAILS_GRAPHS");
 }
 
 componentWillReceiveProps(nextProps) {
-    const { graphs, history, ISOfrom, ISOto, tree, location, bugId } = nextProps;
+    const { graphs, history, from, to, tree, location, bugId } = nextProps;
 
     if (graphs.length > 0 && graphs !== this.props.graphs) {
         this.setState(calculateMetrics(graphs));
@@ -33,8 +33,8 @@ componentWillReceiveProps(nextProps) {
         this.updateData(location.search);
     }
     //update query params in the address bar if dates or tree are updated via the UI
-    if (ISOfrom !== this.props.ISOfrom || ISOto !== this.props.ISOto || tree !== this.props.tree) {
-        const queryParams = createQueryParams({ startday: ISOfrom, endday: ISOto, tree, bug: bugId });
+    if (from !== this.props.from || to !== this.props.to || tree !== this.props.tree) {
+        const queryParams = createQueryParams({ startday: from, endday: to, tree, bug: bugId });
 
         if (queryParams !== history.location.search) {
             history.replace(`/bugdetails${queryParams}`);
@@ -45,11 +45,11 @@ componentWillReceiveProps(nextProps) {
 }
 
 updateData(query) {
-    const [from, to, ISOfrom, ISOto, tree, bugId] = parseQueryParams(query);
+    const [from, to, tree, bugId] = parseQueryParams(query);
     const { updateTree, updateDates, fetchData, updateBugDetails, summary, bugCount } = this.props;
-    const params = { startday: ISOfrom, endday: ISOto, tree, bug: bugId };
+    const params = { startday: from, endday: to, tree, bug: bugId };
 
-    updateDates(from, to, ISOfrom, ISOto, "BUG_DETAILS");
+    updateDates(from, to, "BUG_DETAILS");
     updateTree(tree, "BUG_DETAILS");
     // Todo fetch summary from bugzilla
     updateBugDetails(bugId, summary, bugCount, "BUG_DETAILS");
@@ -58,7 +58,7 @@ updateData(query) {
 }
 
 render() {
-    const { graphs, tableFailureMessage, graphFailureMessage, from, to, ISOfrom, ISOto, bugDetails, tree, bugId, summary, bugCount } = this.props;
+    const { graphs, tableFailureMessage, graphFailureMessage, from, to, bugDetails, tree, bugId, summary, bugCount } = this.props;
     const columns = [
         {
             Header: "Push Time",
@@ -92,7 +92,7 @@ render() {
             Cell: props => <a href={logviewerUrl(props.original.tree, props.value)} target="_blank">view details</a>
         }
     ];
-    const params = { startday: ISOfrom, endday: ISOto, tree, bug: bugId };
+    const params = { startday: from, endday: to, tree, bug: bugId };
 
     let graphOneData = null;
     let graphTwoData = null;
@@ -113,7 +113,7 @@ render() {
                 <Col xs="12" className="mx-auto"><h1>{`Details for Bug ${bugId}`}</h1></Col>
             </Row>
             <Row>
-                <Col xs="12" className="mx-auto"><p className="subheader">{`${from} to ${to} UTC`}</p></Col>
+                <Col xs="12" className="mx-auto"><p className="subheader">{`${prettyDate(from)} to ${prettyDate(to)} UTC`}</p></Col>
             </Row>
             {summary &&
             <Row>
@@ -149,8 +149,6 @@ const mapStateToProps = state => ({
     graphsFailureMessage: state.bugDetailsGraphData.message,
     from: state.bugDetailsDates.from,
     to: state.bugDetailsDates.to,
-    ISOfrom: state.bugDetailsDates.ISOfrom,
-    ISOto: state.bugDetailsDates.ISOto,
     tree: state.bugDetailsTree.tree,
     bugId: state.bugDetails.bugId,
     summary: state.bugDetails.summary,
@@ -159,7 +157,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
-    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name)),
     updateBugDetails: (bugId, summary, bugCount, name) => dispatch(updateSelectedBugDetails(bugId, summary, bugCount, name))
 });

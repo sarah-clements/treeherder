@@ -1,10 +1,16 @@
 import moment from "moment";
 import { bugzillaDomain } from "./constants";
 
-export const formatDates = (date) => {
-    const ISOdate = date.format("YYYY-MM-DD");
-    const prettyDate = date.format("ddd MMM D, YYYY");
-    return [ISOdate, prettyDate];
+//be sure to wrap date in a moment()
+export const ISODate = date => date.format("YYYY-MM-DD");
+
+export const prettyDate = date => moment(date).format("ddd MMM D, YYYY");
+
+export const setDateRange = (day, numDays) => {
+    const to = ISODate(day);
+    const from = ISODate(day.subtract(numDays, "days"));
+    console.log(from, to);
+    return { from, to };
 };
 
 export const createApiUrl = (domain, endpoint, params) => {
@@ -24,15 +30,13 @@ export const jobsUrl = (tree, revision) => `http://localhost:8000/#/jobs?repo=${
 
 export const parseQueryParams = (search) => {
     const params = new URLSearchParams(search);
-    const ISOfrom = params.get("startday");
-    const ISOto = params.get("endday");
-    const from = moment(ISOfrom).format("ddd MMM D, YYYY");
-    const to = moment(ISOto).format("ddd MMM D, YYYY");
+    const from = params.get("startday");
+    const to = params.get("endday");
     const bugId = params.get("bug");
     if (bugId) {
-        return [from, to, ISOfrom, ISOto, params.get("tree"), bugId];
+        return [from, to, params.get("tree"), bugId];
     }
-    return [from, to, ISOfrom, ISOto, params.get("tree")];
+    return [from, to, params.get("tree")];
 };
 
 export const createQueryParams = (params) => {

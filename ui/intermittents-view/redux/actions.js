@@ -34,12 +34,10 @@ export const fetchBugDataFailure = name => ({
     message: "Oops, there was a problem retrieving the data. Please try again later."
 });
 
-export const updateDateRange = (from, to, ISOfrom, ISOto, name) => ({
+export const updateDateRange = (from, to, name) => ({
     type: `UPDATE_${name}_DATE_RANGE`,
     from,
     to,
-    ISOfrom,
-    ISOto
 });
 
 export const updateTreeName = (tree, name) => ({

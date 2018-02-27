@@ -1,19 +1,8 @@
 import moment from "moment";
-import { formatDates } from "../helpers";
-
-const getInitialDates = (today) => {
-    const [ISOto, to] = formatDates(today);
-    const [ISOfrom, from] = formatDates(today.subtract(7, "days"));
-    return { from, to, ISOfrom, ISOto };
-};
+import { setDateRange } from "../helpers";
 
 export const fetchData = (name = "") => (state = { data: {}, message: "" }, action) => {
     switch (action.type) {
-        // case "REQUEST_BUGS_DATA":
-        //     return {
-        //         ...state,
-        //         spinner: true,
-        //     }
         case `FETCH_${name}_SUCCESS`:
             return {
                 ...state,
@@ -29,15 +18,13 @@ export const fetchData = (name = "") => (state = { data: {}, message: "" }, acti
     }
 };
 
-export const updateDates = (name = "") => (state = getInitialDates(moment().utc()), action) => {
+export const updateDates = (name = "") => (state = setDateRange(moment().utc(), 7), action) => {
     switch (action.type) {
         case `UPDATE_${name}_DATE_RANGE`:
             return {
                 ...state,
                 from: action.from,
-                to: action.to,
-                ISOfrom: action.ISOfrom,
-                ISOto: action.ISOto
+                to: action.to
             };
     default:
             return state;

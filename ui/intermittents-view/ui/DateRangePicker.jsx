@@ -6,7 +6,7 @@ import moment from "moment";
 import { parseDate, formatDate } from "react-day-picker/moment";
 import { setTimeout } from "timers";
 import { Button } from "reactstrap";
-import { formatDates, createApiUrl } from "../helpers";
+import { ISODate, createApiUrl } from "../helpers";
 import { fetchBugData, updateDateRange, fetchBugsThenBugzilla } from "./../redux/actions";
 import { treeherderDomain } from "../constants";
 
@@ -52,9 +52,9 @@ class DateRangePicker extends React.Component {
 
     updateData() {
         const { graphName, fetchData, updateDates, fetchFullBugData, name, tree, bugId, tableApi, graphApi } = this.props;
-        const [ISOto, to] = formatDates(moment(this.state.to));
-        const [ISOfrom, from] = formatDates(moment(this.state.from));
-        const params = { startday: ISOfrom, endday: ISOto, tree };
+        const from = ISODate(moment(this.state.from));
+        const to = ISODate(moment(this.state.to));
+        const params = { startday: from, endday: to, tree };
 
         if (bugId) {
             params.bug = bugId;
@@ -63,20 +63,10 @@ class DateRangePicker extends React.Component {
             fetchFullBugData(createApiUrl(treeherderDomain, tableApi, params), name);
         }
         fetchData(createApiUrl(treeherderDomain, graphApi, params), graphName);
-        updateDates(from, to, ISOfrom, ISOto, name);
+        updateDates(from, to, name);
     }
 
-    // updateData() {
-    //     const [ISOto, to] = formatDates(moment(this.state.to));
-    //     const [ISOfrom, from] = formatDates(moment(this.state.from));
-    //     const { fetchData, updateDates, name, graphName, tree, tableApi, graphApi, bugId } = this.props;
-    //     fetchData(createApiUrl(tableApi, ISOfrom, ISOto, tree, bugId), name);
-    //     fetchData(createApiUrl(graphApi, ISOfrom, ISOto, tree, bugId), graphName);
-    //     updateDates(from, to, ISOfrom, ISOto, name);
-    // }
-
     render() {
-        // const today = new Date();
         const { from, to } = this.state;
         const modifiers = { start: from, end: to };
 
@@ -90,7 +80,6 @@ class DateRangePicker extends React.Component {
                                 format="ddd MMM D, YYYY"
                                 dayPickerProps={{
                                     selectedDays: [from, { from, to }],
-                                    // disabledDays: { after: today },
                                     toMonth: to,
                                     modifiers,
                                     numberOfMonths: 2
@@ -108,7 +97,6 @@ class DateRangePicker extends React.Component {
                                 format="ddd MMM D, YYYY"
                                 dayPickerProps={{
                                     selectedDays: [from, { from, to }],
-                                    // disabledDays: { after: today },
                                     month: from,
                                     fromMonth: from,
                                     modifiers,
@@ -126,7 +114,7 @@ class DateRangePicker extends React.Component {
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
     fetchFullBugData: (url, name) => dispatch(fetchBugsThenBugzilla(url, name)),
-    updateDates: (from, to, ISOfrom, ISOto, name) => dispatch(updateDateRange(from, to, ISOfrom, ISOto, name)),
+    updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
 });
 
 export default connect(null, mapDispatchToProps)(DateRangePicker);

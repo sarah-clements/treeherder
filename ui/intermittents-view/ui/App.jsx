@@ -9,7 +9,7 @@ const App = ({ store }) => {
     const { dates, mainTree } = store.getState();
     let defaultPath = {
         pathname: '/main',
-        search: `?startday=${dates.ISOfrom}&endday=${dates.ISOto}&tree=${mainTree.tree}`
+        search: `?startday=${dates.from}&endday=${dates.to}&tree=${mainTree.tree}`
     };
     return (
         <Provider store={store}>
