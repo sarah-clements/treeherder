@@ -1,13 +1,17 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
-container {
-    justify-content: center;
-    margin: auto;
-}
-
 body {
     text-align: center;
     overflow-x: auto;  
+}
+
+h1, .subheader {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.subheader {
+    font-size: 1.5rem;
+    margin-bottom: 7px;
 }
 
 .top-navbar {
@@ -29,25 +33,8 @@ body {
     color: lightgray;
 }
 
-.navbar-link:hover {
-    color: #eba870;
-}
-
 .navbar-link:visited {
     color: lightgray;
-}
-
-.navbar-input {
-    position: relative;
-}
-
-h1, .subheader {
-    font-family: 'Open Sans', sans-serif;
-}
-
-.subheader {
-    font-size: 1.5rem;
-    margin-bottom: 7px;
 }
 
 /* overriding bootstrap default input style */
@@ -60,10 +47,6 @@ input {
     vertical-align: middle
 }
 
-.hide {
-    visibility: hidden;
-}
-
 .small-text {
     font-size: 12px;
 }
@@ -72,6 +55,6 @@ input {
     font-size: 14px;
 }
 
-.dark-orange {
-    color: #dd6602;
+.hide {
+    visibility: hidden;
 }

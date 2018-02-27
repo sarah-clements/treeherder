@@ -41,7 +41,6 @@ const GenericTable = ({ fetchData, fetchFullBugData, name, params, bugId, tableA
         }
         return {};
     };
-    //if dynamic table row styling based on bug status/whiteboard is not needed, pass the trStyling prop a false bool
     return (
         <ReactTable
                     manual

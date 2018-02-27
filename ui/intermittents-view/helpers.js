@@ -78,8 +78,8 @@ export const calculateMetrics = (data) => {
     for (let i = 0; i < data.length; i++) {
         let failures = data[i].failure_count;
         let testRuns = data[i].test_runs;
-        let freq = testRuns < 1 || failures < 1 ? 0 : Math.round(failures/testRuns);
-        // need to convert a date to Date object because metrics graphics only accepts JS Date objects
+        let freq = (testRuns < 1 || failures < 1) ? 0 : Math.round(failures/testRuns);
+        // metrics graphics only accepts JS Date objects
         let date = moment(data[i].date).toDate();
 
         totalFailures += failures;

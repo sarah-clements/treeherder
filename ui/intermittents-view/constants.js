@@ -9,7 +9,7 @@ export const graphOneSpecs = {
     right: 40,
     interpolate: d3.curveLinear,
     color: "#dd6602",
-    target: "graph",
+    target: "",
     x_accessor: "date",
     y_accessor: "value"
 };
@@ -21,7 +21,7 @@ export const graphTwoSpecs = {
     right: 40,
     interpolate: d3.curveLinear,
     color: ["blue", "green"],
-    target: "graph",
+    target: "",
     x_accessor: "date",
     y_accessor: "value",
     legend: ["Orange Count", "Push Count"],

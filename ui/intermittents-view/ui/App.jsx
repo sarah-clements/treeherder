@@ -7,7 +7,7 @@ import BugDetailsView from "./BugDetailsView";
 
 const App = ({ store }) => {
     const { dates, mainTree } = store.getState();
-    let defaultPath = {
+    const defaultPath = {
         pathname: '/main',
         search: `?startday=${dates.from}&endday=${dates.to}&tree=${mainTree.tree}`
     };
