@@ -39,9 +39,8 @@ export const updateTreeName = (tree, name) => ({
     tree
 });
 
-export const updateSelectedBugDetails = (bugId, summary, bugCount, name) => ({
+export const updateSelectedBugDetails = (bugId, summary, name) => ({
     type: `UPDATE_SELECTED_${name}`,
     bugId,
     summary,
-    bugCount
 });

@@ -21,7 +21,7 @@ class BugColumn extends React.Component {
     updateStateData() {
         // bugdetailsview inherits data from the main view
         const { data, updateDates, updateTree, updateBugDetails, from, to, tree } = this.props;
-        updateBugDetails(data.id, data.summary, data.count, "BUG_DETAILS");
+        updateBugDetails(data.id, data.summary, "BUG_DETAILS");
         updateTree(tree, "BUG_DETAILS");
         updateDates(from, to, "BUG_DETAILS");
     }
@@ -49,7 +49,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    updateBugDetails: (bugId, summary, bugCount, name) => dispatch(updateSelectedBugDetails(bugId, summary, bugCount, name)),
+    updateBugDetails: (bugId, summary, name) => dispatch(updateSelectedBugDetails(bugId, summary, name)),
     updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name))
 });

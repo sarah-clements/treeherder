@@ -12,6 +12,7 @@ const rootReducer = combineReducers({
     bugDetailsTree: updateTree("BUG_DETAILS"),
     bugDetails: updateBugDetails("BUG_DETAILS"),
     bugzilla: fetchData("BUGZILLA"),
+    bugzillaBugDetails: fetchData("BUGZILLA_BUG_DETAILS")
 });
 
 export default rootReducer;

@@ -43,14 +43,13 @@ export const updateTree = (name = "") => (state = { tree: "trunk" }, action) => 
     }
 };
 
-export const updateBugDetails = (name = "") => (state = { bugId: null, summary: null, bugCount: null }, action) => {
+export const updateBugDetails = (name = "") => (state = { bugId: null, summary: null }, action) => {
     switch (action.type) {
         case `UPDATE_SELECTED_${name}`:
             return {
                 ...state,
                 bugId: action.bugId,
                 summary: action.summary,
-                bugCount: action.bugCount
             };
     default:
             return state;

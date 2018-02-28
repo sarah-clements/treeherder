@@ -9,12 +9,11 @@ class IdPagination(pagination.CursorPagination):
 
 class CustomPagePagination(pagination.PageNumberPagination):
     page_query_param = 'page'
-    page_size_query_param = 'rows'
-    max_page_size = 100
     page_size = 20
 
     def get_paginated_response(self, data):
         return Response({
             'total_pages': self.page.paginator.num_pages,
+            'count': self.page.paginator.count,
             'results': data
         })

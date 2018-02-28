@@ -8,7 +8,8 @@ import Navigation from "./Navigation";
 import { fetchBugData, updateDateRange, updateTreeName, updateSelectedBugDetails } from "./../redux/actions";
 import GenericTable from "./GenericTable";
 import GraphsContainer from "./GraphsContainer";
-import { calculateMetrics, jobsUrl, createApiUrl, logviewerUrl, parseQueryParams, createQueryParams, prettyDate } from "../helpers";
+import { calculateMetrics, jobsUrl, createApiUrl, logviewerUrl, parseQueryParams, createQueryParams,
+         prettyDate, bugzillaBugsApi } from "../helpers";
 import { bugDetailsEndpoint, graphsEndpoint, treeherderDomain } from "../constants";
 
 class BugDetailsView extends React.Component {
@@ -24,14 +25,12 @@ componentDidMount() {
 }
 
 componentWillReceiveProps(nextProps) {
-    const { graphs, history, from, to, tree, location, bugId } = nextProps;
+    const { history, from, to, tree, location, bugId, bugzillaData, summary, updateBugDetails } = nextProps;
 
-    if (graphs.length > 0 && graphs !== this.props.graphs) {
-        this.setState(calculateMetrics(graphs));
-    }
     if (location.search !== this.props.location.search) {
         this.updateData(location.search);
     }
+
     //update query params in the address bar if dates or tree are updated via the UI
     if (from !== this.props.from || to !== this.props.to || tree !== this.props.tree) {
         const queryParams = createQueryParams({ startday: from, endday: to, tree, bug: bugId });
@@ -42,23 +41,30 @@ componentWillReceiveProps(nextProps) {
             this.props.location.search = queryParams;
         }
     }
+
+    if (bugzillaData.bugs && bugzillaData.bugs[0].summary !== summary) {
+        updateBugDetails(bugzillaData.bugs[0].id, bugzillaData.bugs[0].summary, "BUG_DETAILS");
+    }
 }
 
 updateData(query) {
     const { startday, endday, tree, bug } = parseQueryParams(query);
-    const { updateTree, updateDates, fetchData, updateBugDetails, summary, bugCount } = this.props;
+    const { updateTree, updateDates, fetchData, updateBugDetails, bugId } = this.props;
     const params = { startday, endday, tree, bug };
+
     updateDates(startday, endday, "BUG_DETAILS");
     updateTree(tree, "BUG_DETAILS");
     fetchData(createApiUrl(treeherderDomain, graphsEndpoint, params), "BUG_DETAILS_GRAPHS");
     fetchData(createApiUrl(treeherderDomain, bugDetailsEndpoint, params), "BUG_DETAILS");
 
-    // Todo fetch summary from bugzilla
-    updateBugDetails(bug, summary, bugCount, "BUG_DETAILS");
+    if (bug !== bugId) {
+        fetchData(bugzillaBugsApi("rest/bug", { include_fields: "summary,id", id: bug }), "BUGZILLA_BUG_DETAILS");
+        updateBugDetails(bug, "", "BUG_DETAILS");
+    }
 }
 
 render() {
-    const { graphs, tableFailureMessage, graphFailureMessage, from, to, bugDetails, tree, bugId, summary, bugCount } = this.props;
+    const { graphs, tableFailureMessage, graphFailureMessage, from, to, bugDetails, tree, bugId, summary } = this.props;
     const columns = [
         {
             Header: "Push Time",
@@ -100,7 +106,6 @@ render() {
     if (graphs && graphs.length > 0) {
         ({ graphOneData, graphTwoData } = calculateMetrics(graphs));
     }
-
     return (
         <Container fluid style={{ marginBottom: "5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
             <Navigation params={params} tableApi={bugDetailsEndpoint} graphApi={graphsEndpoint} bugId={bugId}
@@ -119,9 +124,9 @@ render() {
             <Row>
                 <Col xs="4" className="mx-auto"><p className="text-secondary text-center">{summary}</p></Col>
             </Row>}
-            {bugCount &&
+            {bugDetails &&
             <Row>
-                <Col xs="12" className="mx-auto"><p className="text-secondary">{bugCount} total failures</p></Col>
+                <Col xs="12" className="mx-auto"><p className="text-secondary">{bugDetails.count} total failures</p></Col>
             </Row>}
 
             {!graphFailureMessage && graphOneData && graphTwoData ?
@@ -152,14 +157,14 @@ const mapStateToProps = state => ({
     tree: state.bugDetailsTree.tree,
     bugId: state.bugDetails.bugId,
     summary: state.bugDetails.summary,
-    bugCount: state.bugDetails.bugCount
+    bugzillaData: state.bugzillaBugDetails.data
 });
 
 const mapDispatchToProps = dispatch => ({
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),
     updateDates: (from, to, name) => dispatch(updateDateRange(from, to, name)),
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name)),
-    updateBugDetails: (bugId, summary, bugCount, name) => dispatch(updateSelectedBugDetails(bugId, summary, bugCount, name))
+    updateBugDetails: (bugId, summary, name) => dispatch(updateSelectedBugDetails(bugId, summary, name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BugDetailsView);
