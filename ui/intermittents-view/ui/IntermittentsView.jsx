@@ -6,7 +6,8 @@ import Navigation from "./Navigation";
 import GenericTable from "./GenericTable";
 import { fetchBugData, updateTreeName, updateDateRange, fetchBugsThenBugzilla } from "./../redux/actions";
 import BugColumn from "./BugColumn";
-import { createApiUrl, calculateMetrics, mergeBugsData, parseQueryParams, createQueryParams, prettyDate } from "../helpers";
+import { createApiUrl, calculateMetrics, mergeBugsData, parseQueryParams, createQueryParams,
+    prettyDate, updateQueryParams } from "../helpers";
 import GraphsContainer from "./GraphsContainer";
 import { treeherderDomain, bugsEndpoint, graphsEndpoint } from "../constants";
 
@@ -25,21 +26,16 @@ componentDidMount() {
 }
 
 componentWillReceiveProps(nextProps) {
-    const { history, from, to, tree, location } = nextProps;
+    const { from, to, tree, location, history } = nextProps;
 
     //update all data if the user edits dates or tree via the query params
     if (location.search !== this.props.location.search) {
         this.updateData(location.search);
     }
-    //update query params in the address bar if dates or tree are updated via the UI
+    //update query params if dates or tree are updated via the UI
     if (from !== this.props.from || to !== this.props.to || tree !== this.props.tree) {
         const queryParams = createQueryParams({ startday: from, endday: to, tree });
-
-        if (queryParams !== history.location.search) {
-            history.replace(`/main${queryParams}`);
-            //we do this so the api's won't be called twice (location/history updates will trigger this lifecycle hook)
-            this.props.location.search = queryParams;
-        }
+        updateQueryParams("/main", queryParams, history, this.props.location);
     }
 }
 

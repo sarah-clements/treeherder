@@ -55,9 +55,6 @@ Nav.propTypes = {
     caret: PropTypes.bool,
 };
 
-// not using mapStateToProps because this component is being used for different views
-// with two different slices of the state (for trees)
-
 const mapDispatchToProps = dispatch => ({
     updateTree: (tree, name) => dispatch(updateTreeName(tree, name)),
     fetchData: (url, name) => dispatch(fetchBugData(url, name)),

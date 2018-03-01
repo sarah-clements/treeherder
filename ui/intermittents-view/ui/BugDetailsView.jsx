@@ -9,7 +9,7 @@ import { fetchBugData, updateDateRange, updateTreeName, updateSelectedBugDetails
 import GenericTable from "./GenericTable";
 import GraphsContainer from "./GraphsContainer";
 import { calculateMetrics, jobsUrl, createApiUrl, logviewerUrl, parseQueryParams, createQueryParams,
-         prettyDate, bugzillaBugsApi } from "../helpers";
+         prettyDate, bugzillaBugsApi, updateQueryParams } from "../helpers";
 import { bugDetailsEndpoint, graphsEndpoint, treeherderDomain } from "../constants";
 
 class BugDetailsView extends React.Component {
@@ -34,12 +34,7 @@ componentWillReceiveProps(nextProps) {
     //update query params in the address bar if dates or tree are updated via the UI
     if (from !== this.props.from || to !== this.props.to || tree !== this.props.tree) {
         const queryParams = createQueryParams({ startday: from, endday: to, tree, bug: bugId });
-
-        if (queryParams !== history.location.search) {
-            history.replace(`/bugdetails${queryParams}`);
-            //we do this so the api's won't be called twice (location/history updates will trigger this lifecycle hook)
-            this.props.location.search = queryParams;
-        }
+        updateQueryParams("/bugdetails", queryParams, history, this.props.location);
     }
 
     if (bugzillaData.bugs && bugzillaData.bugs[0].summary !== summary) {

@@ -41,6 +41,14 @@ export const createQueryParams = (params) => {
     return `?${query.toString()}`;
 };
 
+export const updateQueryParams = (view, queryParams, history, location) => {
+    if (queryParams !== history.location.search) {
+        history.replace(`${view}${queryParams}`);
+        //we do this so the api's won't be called twice (location/history updates will trigger this lifecycle hook)
+        location.search = queryParams;
+    }
+};
+
 export const formatBugsForBugzilla = (data) => {
     let bugs = '';
     for (let i = 0; i < data.length; i++) {

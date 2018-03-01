@@ -14,8 +14,8 @@ class DateRangePicker extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            from: undefined,
-            to: undefined,
+            from: null,
+            to: null,
         };
         this.fromChange = this.fromChange.bind(this);
         this.toChange = this.toChange.bind(this);
