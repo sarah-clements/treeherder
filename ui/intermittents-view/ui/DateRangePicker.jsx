@@ -87,25 +87,25 @@ class DateRangePicker extends React.Component {
         />
         <span className="ml-1 mr-1">-</span>
         <span className="InputFromTo-to">
-                    <DayPickerInput
-                      ref={(element) => {
-                        this.to = element;
-                      }}
-                      value={to}
-                      placeholder="To"
-                      formatDate={formatDate}
-                      parseDate={parseDate}
-                      format="ddd MMM D, YYYY"
-                      dayPickerProps={{
-                        selectedDays: [from, { from, to }],
-                        month: from,
-                        fromMonth: from,
-                        modifiers,
-                        numberOfMonths: 2
-                      }}
-                      onDayChange={this.toChange}
-                    />
-                </span>
+          <DayPickerInput
+            ref={(element) => {
+              this.to = element;
+            }}
+            value={to}
+            placeholder="To"
+            formatDate={formatDate}
+            parseDate={parseDate}
+            format="ddd MMM D, YYYY"
+            dayPickerProps={{
+              selectedDays: [from, { from, to }],
+              month: from,
+              fromMonth: from,
+              modifiers,
+              numberOfMonths: 2
+            }}
+            onDayChange={this.toChange}
+          />
+        </span>
         <Button color="secondary" className="ml-2" onClick={this.updateData}>update</Button>
       </div>
     );

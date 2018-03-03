@@ -42,7 +42,11 @@ class Navigation extends React.Component {
             <DropdownToggle className="btn-navbar navbar-link" nav caret>
               Tree
             </DropdownToggle>
-            <DropdownMenuItems options={treeOptions} updateData={this.updateData} default={this.props.tree} />
+            <DropdownMenuItems
+              options={treeOptions}
+              updateData={this.updateData}
+              default={this.props.tree}
+            />
           </UncontrolledDropdown>
         </Collapse>
       </Navbar>

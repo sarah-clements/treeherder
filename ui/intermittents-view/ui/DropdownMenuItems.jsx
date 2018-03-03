@@ -34,7 +34,10 @@ export default class DropdownMenuItems extends React.Component {
       <DropdownMenu>
         {options.map((item, index) =>
           (<DropdownItem key={index} onClick={this.changeSelection}>
-            <Icon name="check" className={`pr-1 ${selectedItem === item ? "" : "hide"}`} />
+            <Icon
+              name="check"
+              className={`pr-1 ${selectedItem === item ? "" : "hide"}`}
+            />
             {item}
           </DropdownItem>))}
       </DropdownMenu>

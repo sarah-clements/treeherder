@@ -93,8 +93,12 @@ class IntermittentsView extends React.Component {
     return (
       <Container fluid style={{ marginBottom: "5rem", marginTop: "5rem", maxWidth: "1200px" }}>
         <Navigation
-          name="BUGS" graphName="BUGS_GRAPHS" tableApi={bugsEndpoint} params={params}
-          graphApi={graphsEndpoint} tree={tree}
+          name="BUGS"
+          graphName="BUGS_GRAPHS"
+          tableApi={bugsEndpoint}
+          params={params}
+          graphApi={graphsEndpoint}
+          tree={tree}
         />
         <Row>
           <Col xs="12" className="mx-auto pt-3"><h1>Intermittent Test Failures</h1></Col>
@@ -109,14 +113,27 @@ class IntermittentsView extends React.Component {
         </Row>
 
         {!graphFailureMessage && graphOneData && graphTwoData ?
-          <GraphsContainer 
-            graphOneData={graphOneData} graphTwoData={graphTwoData} name="BUGS" params={params}
-            graphName="BUGS_GRAPHS" tableApi={bugsEndpoint} graphApi={graphsEndpoint} tree={tree}
+          <GraphsContainer
+            graphOneData={graphOneData}
+            graphTwoData={graphTwoData}
+            name="BUGS"
+            params={params}
+            graphName="BUGS_GRAPHS"
+            tableApi={bugsEndpoint}
+            graphApi={graphsEndpoint}
+            tree={tree}
           /> : <p>{tableFailureMessage}</p>}
 
         {!tableFailureMessage ?
-          <GenericTable bugs={bugsData} columns={columns} name="BUGS" tableApi={bugsEndpoint} params={params}
-                        totalPages={bugs.total_pages} trStyling updateTable={this.updateTable}
+          <GenericTable
+            bugs={bugsData}
+            columns={columns}
+            name="BUGS"
+            tableApi={bugsEndpoint}
+            params={params}
+            totalPages={bugs.total_pages}
+            trStyling
+            updateTable={this.updateTable}
           /> : <p>{tableFailureMessage}</p>}
       </Container>);
   }

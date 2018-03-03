@@ -5,41 +5,41 @@ import { updateSelectedBugDetails, updateDateRange, updateTreeName } from "./../
 import { bugzillaBugsApi } from "../helpers";
 
 class BugColumn extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            displayBugDetails: false,
-        };
-        this.displayBugText = this.displayBugText.bind(this);
-        this.updateStateData = this.updateStateData.bind(this);
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      displayBugDetails: false,
+    };
+    this.displayBugText = this.displayBugText.bind(this);
+    this.updateStateData = this.updateStateData.bind(this);
+  }
 
-    displayBugText() {
-        this.setState({ displayBugDetails: !this.state.displayBugDetails });
-    }
+  displayBugText() {
+    this.setState({ displayBugDetails: !this.state.displayBugDetails });
+  }
 
-    updateStateData() {
-        // bugdetailsview inherits data from the main view
-        const { data, updateDates, updateTree, updateBugDetails, from, to, tree } = this.props;
-        updateBugDetails(data.id, data.summary, "BUG_DETAILS");
-        updateTree(tree, "BUG_DETAILS");
-        updateDates(from, to, "BUG_DETAILS");
-    }
+  updateStateData() {
+    // bugdetailsview inherits data from the main view
+    const { data, updateDates, updateTree, updateBugDetails, from, to, tree } = this.props;
+    updateBugDetails(data.id, data.summary, "BUG_DETAILS");
+    updateTree(tree, "BUG_DETAILS");
+    updateDates(from, to, "BUG_DETAILS");
+  }
 
-    render() {
-        const { tree, from, to } = this.props;
-        const { id } = this.props.data;
-        return (
-            <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
-                <span className="text-primary">{id}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
-                    <Link onClick={this.updateStateData} to={{ pathname: "/bugdetails", search: `?startday=${from}&endday=${to}&tree=${tree}&bug=${id}` }}>
-                        details
-                    </Link>
-                    <a className="ml-1" target="_blank" href={bugzillaBugsApi("show_bug.cgi", { id })}>bugzilla</a>
-                </span>
-            </div>
-        );
-    }
+  render() {
+    const { tree, from, to } = this.props;
+    const { id } = this.props.data;
+    return (
+      <div onMouseEnter={this.displayBugText} onMouseLeave={this.displayBugText}>
+        <span className="text-primary">{id}</span><span className={`ml-1 small-text ${this.state.displayBugDetails ? "" : "hidden"}`}>
+          <Link onClick={this.updateStateData} to={{ pathname: "/bugdetails", search: `?startday=${from}&endday=${to}&tree=${tree}&bug=${id}` }}>
+            details
+          </Link>
+          <a className="ml-1" target="_blank" href={bugzillaBugsApi("show_bug.cgi", { id })}>bugzilla</a>
+        </span>
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = state => ({

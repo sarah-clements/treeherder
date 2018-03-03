@@ -12,20 +12,20 @@ export const setDateRange = (day, numDays) => {
   return { from, to };
 };
 
-export const createApiUrl = (domain, endpoint, params) => {
+export const createApiUrl = (domain, api, params) => {
   const query = createQueryParams(params);
-  return `${domain}${endpoint}${query}`;
+  return `${domain}${api}${query}`;
 };
 
 //bugs can be one bug or a comma separated (no spaces) string of bugs
-export const bugzillaBugsApi = (endpoint, params) => {
+export const bugzillaBugsApi = (api, params) => {
   const query = createQueryParams(params);
-  return `${bugzillaDomain}${endpoint}${query}`;
+  return `${bugzillaDomain}${api}${query}`;
 };
 
-export const logviewerUrl = (tree, treeherderId) => `${SERVICE_DOMAIN}logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
+export const logviewerUrl = (tree, treeherderId) => `logviewer.html#?repo=${tree}&job_id=${treeherderId}`;
 
-export const jobsUrl = (tree, revision) => `${SERVICE_DOMAIN}#/jobs?repo=${tree}&revision=${revision}`;
+export const jobsUrl = (tree, revision) => `#/jobs?repo=${tree}&revision=${revision}`;
 
 export const parseQueryParams = (search) => {
   const params = new URLSearchParams(search);

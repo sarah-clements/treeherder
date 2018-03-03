@@ -110,8 +110,14 @@ class BugDetailsView extends React.Component {
     }
     return (
       <Container fluid style={{ marginBottom: "5rem", marginTop: "4.5rem", maxWidth: "1200px" }}>
-        <Navigation params={params} tableApi={bugDetailsEndpoint} graphApi={graphsEndpoint} bugId={bugId}
-                    name="BUG_DETAILS" graphName="BUG_DETAILS_GRAPHS" tree={tree}
+        <Navigation
+          params={params}
+          tableApi={bugDetailsEndpoint}
+          graphApi={graphsEndpoint}
+          bugId={bugId}
+          name="BUG_DETAILS"
+          graphName="BUG_DETAILS_GRAPHS"
+          tree={tree}
         />
         <Row>
           <Col xs="12"><span className="pull-left"><Link to="/"><Icon name="arrow-left" className="pr-1" />
@@ -135,14 +141,28 @@ class BugDetailsView extends React.Component {
         </Row>}
 
         {!graphFailureMessage && graphOneData && graphTwoData ?
-          <GraphsContainer graphOneData={graphOneData} graphTwoData={graphTwoData} name="BUG_DETAILS" tree={tree}
-                           graphName="BUG_DETAILS_GRAPHS" tableApi={bugDetailsEndpoint} params={params}
-                           graphApi={graphsEndpoint} bugId={bugId} dateOptions
+          <GraphsContainer
+            graphOneData={graphOneData}
+            graphTwoData={graphTwoData}
+            name="BUG_DETAILS"
+            tree={tree}
+            graphName="BUG_DETAILS_GRAPHS"
+            tableApi={bugDetailsEndpoint}
+            params={params}
+            graphApi={graphsEndpoint}
+            bugId={bugId}
+            dateOptions
           /> : <p>{tableFailureMessage}</p>}
 
         {!tableFailureMessage || (bugDetails && !tableFailureMessage) ?
-          <GenericTable bugs={bugDetails.results} columns={columns} name="BUG_DETAILS" tableApi={bugDetailsEndpoint}
-                        totalPages={bugDetails.total_pages} params={params} bugId={bugId}
+          <GenericTable
+            bugs={bugDetails.results}
+            columns={columns}
+            name="BUG_DETAILS"
+            tableApi={bugDetailsEndpoint}
+            totalPages={bugDetails.total_pages}
+            params={params}
+            bugId={bugId}
           /> : <p>{tableFailureMessage}</p>}
       </Container>);
   }

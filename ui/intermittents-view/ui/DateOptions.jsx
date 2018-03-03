@@ -68,11 +68,19 @@ class DateOptions extends React.Component {
           <DropdownToggle caret>
             date range
           </DropdownToggle>
-          <DropdownMenuItems options={dateOptions} updateData={this.updateDateRange} />
+          <DropdownMenuItems
+            options={dateOptions}
+            updateData={this.updateDateRange}
+          />
         </ButtonDropdown>
         {dateRange === "custom range" &&
-        <DateRangePicker tree={tree} tableApi={tableApi} graphApi={graphApi} name={name}
-                         graphName={graphName} bugId={bugId}
+        <DateRangePicker
+          tree={tree}
+          tableApi={tableApi}
+          graphApi={graphApi}
+          name={name}
+          graphName={graphName}
+          bugId={bugId}
         />}
       </div>
     );
