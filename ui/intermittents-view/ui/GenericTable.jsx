@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import { fetchBugData, fetchBugsThenBugzilla } from "../redux/actions";
 import { createApiUrl } from "../helpers";
 
-const GenericTable = ({ fetchData, fetchFullBugData, name, params, bugId, tableApi, bugs, columns, trStyling, totalPages }) => {
+const GenericTable = ({ fetchData, fetchFullBugData, name, params, tableApi, bugs, columns, trStyling, totalPages }) => {
 
   const updateTable = (state) => {
     // table's page count starts at 0
@@ -17,10 +17,10 @@ const GenericTable = ({ fetchData, fetchFullBugData, name, params, bugId, tableA
 
   const updateData = (page) => {
     params.page = page;
-    if (bugId) {
-      fetchData(createApiUrl(SERVICE_DOMAIN, tableApi, params), name);
-    } else {
+    if (name === "BUGS") {
       fetchFullBugData(createApiUrl(SERVICE_DOMAIN, tableApi, params), name);
+    } else {
+      fetchData(createApiUrl(SERVICE_DOMAIN, tableApi, params), name);
     }
   };
 

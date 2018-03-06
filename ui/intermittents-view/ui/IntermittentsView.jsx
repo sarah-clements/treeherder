@@ -17,13 +17,11 @@ class IntermittentsView extends React.Component {
   constructor(props) {
     super(props);
     this.updateData = this.updateData.bind(this);
+    this.setQueryParams = this.setQueryParams.bind(this);
   }
 
   componentDidMount() {
-    const { graphs, from, to, tree, fetchData } = this.props;
-    if (!graphs.results) {
-      fetchData(createApiUrl(SERVICE_DOMAIN, graphsEndpoint, { startday: from, endday: to, tree }), "BUGS_GRAPHS");
-    }
+    this.setQueryParams();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -31,7 +29,7 @@ class IntermittentsView extends React.Component {
 
     //update all data if the user edits dates or tree via the query params
     if (location.search !== this.props.location.search) {
-      this.updateData(location.search);
+      this.updateData(parseQueryParams(location.search));
     }
     //update query params if dates or tree are updated via the UI
     if (from !== this.props.from || to !== this.props.to || tree !== this.props.tree) {
@@ -40,13 +38,31 @@ class IntermittentsView extends React.Component {
     }
   }
 
+  setQueryParams() {
+    const { from, to, tree, location, history, graphs, fetchData } = this.props;
+
+    // if the query params are not specified, set params based on default props
+    // otherwise update data based on the params
+    if (location.search === "") {
+      const params = { startday: from, endday: to, tree };
+      const queryParams = createQueryParams(params);
+      updateQueryParams("/main", queryParams, history, location);
+      if (Object.keys(graphs).length === 0) {
+        //only fetch graph data on initial page load
+        fetchData(createApiUrl(SERVICE_DOMAIN, graphsEndpoint, params), "BUGS_GRAPHS");
+      }
+    } else {
+      this.updateData(parseQueryParams(location.search));
+    }
+  }
+
   updateData(params) {
-    const { startday, endday, tree } = parseQueryParams(params);
+    const { startday, endday, tree } = params;
     const { updateTree, updateDates, fetchData, fetchFullBugData } = this.props;
     updateDates(startday, endday, "BUGS");
     updateTree(tree, "BUGS");
-    fetchData(createApiUrl(SERVICE_DOMAIN, graphsEndpoint, { startday, endday, tree }), "BUGS_GRAPHS");
-    fetchFullBugData(createApiUrl(SERVICE_DOMAIN, bugsEndpoint, { startday, endday, tree }), "BUGS");
+    fetchData(createApiUrl(SERVICE_DOMAIN, graphsEndpoint, params), "BUGS_GRAPHS");
+    fetchFullBugData(createApiUrl(SERVICE_DOMAIN, bugsEndpoint, params), "BUGS");
   }
 
   render() {

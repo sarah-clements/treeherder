@@ -19,23 +19,18 @@ class BugDetailsView extends React.Component {
     super(props);
     this.state = {};
     this.updateData = this.updateData.bind(this);
+    this.setQueryParams = this.setQueryParams.bind(this);
   }
 
   componentDidMount() {
-    const { fetchData, from, to, tree, bugId } = this.props;
-    fetchData(createApiUrl(SERVICE_DOMAIN, graphsEndpoint, {
-      startday: from,
-      endday: to,
-      tree,
-      bug: bugId
-    }), "BUG_DETAILS_GRAPHS");
+    this.setQueryParams();
   }
 
   componentWillReceiveProps(nextProps) {
     const { history, from, to, tree, location, bugId, bugzillaData, summary, updateBugDetails } = nextProps;
 
     if (location.search !== this.props.location.search) {
-      this.updateData(location.search);
+      this.updateData(parseQueryParams(location.search));
     }
 
     //update query params in the address bar if dates or tree are updated via the UI
@@ -49,10 +44,19 @@ class BugDetailsView extends React.Component {
     }
   }
 
-  updateData(query) {
-    const { startday, endday, tree, bug } = parseQueryParams(query);
+  setQueryParams() {
+    const { from, to, tree, location, bugId, fetchData } = this.props;
+
+    if (!from || !to || !tree || !bugId) {
+      this.updateData(parseQueryParams(location.search));
+    } else {
+      fetchData(createApiUrl(SERVICE_DOMAIN, graphsEndpoint, { startday: from, endday: to, tree, bug: bugId }), "BUG_DETAILS_GRAPHS");
+    }
+  }
+
+  updateData(params) {
+    const { startday, endday, tree, bug } = params;
     const { updateTree, updateDates, fetchData, updateBugDetails, bugId } = this.props;
-    const params = { startday, endday, tree, bug };
 
     updateDates(startday, endday, "BUG_DETAILS");
     updateTree(tree, "BUG_DETAILS");
@@ -60,8 +64,8 @@ class BugDetailsView extends React.Component {
     fetchData(createApiUrl(SERVICE_DOMAIN, bugDetailsEndpoint, params), "BUG_DETAILS");
 
     if (bug !== bugId) {
-      fetchData(bugzillaBugsApi("rest/bug", { include_fields: "summary,id", id: bug }), "BUGZILLA_BUG_DETAILS");
       updateBugDetails(bug, "", "BUG_DETAILS");
+      fetchData(bugzillaBugsApi("rest/bug", { include_fields: "summary,id", id: bug }), "BUGZILLA_BUG_DETAILS");
     }
   }
 
@@ -154,7 +158,7 @@ class BugDetailsView extends React.Component {
             dateOptions
           /> : <p>{tableFailureMessage}</p>}
 
-        {!tableFailureMessage || (bugDetails && !tableFailureMessage) ?
+        {!tableFailureMessage || (bugDetails && bugId) ?
           <GenericTable
             bugs={bugDetails.results}
             columns={columns}
