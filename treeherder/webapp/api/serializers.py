@@ -314,6 +314,24 @@ class FailuresQueryParamsSerializer(serializers.Serializer):
     endday = serializers.DateTimeField(format='%Y-%m-%d', input_formats=['%Y-%m-%d'])
     tree = serializers.CharField()
     bug = serializers.IntegerField(required=False, allow_null=True, default=None)
+    column = serializers.CharField(required=False, allow_null=True, default=None)
+
+    def validate_column(self, column):
+        # how to handle descending
+        model_field = {
+            'platform': 'job__machine_platform__platform',
+            'revision': 'job__push__revision',
+            'tree': 'job__repository__name',
+            'push_time': 'job__push__time',
+            'machine_name': 'job__machine__name',
+            'build_type': 'job__option_collection_hash',
+            'test_suite': 'job__signature__job_type_name',
+        }
+
+        if column in model_field:
+            return model_field[column]
+        
+        return column
 
     def validate_bug(self, bug):
         if bug is None and self.context == 'requireBug':

@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from django.db.models import Count
 from django.db.models.functions import TruncDate
-from rest_framework import generics
+from rest_framework import (generics, filters)
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 
@@ -53,6 +53,8 @@ class FailuresByBug(generics.ListAPIView):
     serializer_class = FailuresByBugSerializer
     pagination_class = CustomPagePagination
     queryset = None
+    # filter_backends = (filters.OrderingFilter,)
+    # ordering_fields = ('username', 'email')
 
     def list(self, request):
         query_params = FailuresQueryParamsSerializer(data=request.query_params,
@@ -65,7 +67,9 @@ class FailuresByBug(generics.ListAPIView):
         endday = get_end_of_day(query_params.validated_data['endday'])
         repo = query_params.validated_data['tree']
         bug_id = query_params.validated_data['bug']
-
+        column = query_params.validated_data['column']
+        order = column if column else '-job__push__time'
+        print(column)
         self.queryset = (BugJobMap.failures.by_date(startday, endday)
                                   .by_repo(repo)
                                   .by_bug(bug_id)
@@ -73,7 +77,7 @@ class FailuresByBug(generics.ListAPIView):
                                           'bug_id', 'job_id', 'job__push__time', 'job__push__revision',
                                           'job__signature__job_type_name', 'job__option_collection_hash',
                                           'job__machine__name')
-                                  .order_by('-job__push__time'))
+                                   .order_by(column))
 
         lines = (TextLogError.objects.filter(step__job_id__in=self.queryset.values_list('job_id', flat=True),
                                              line__contains='TEST-UNEXPECTED-FAIL')
