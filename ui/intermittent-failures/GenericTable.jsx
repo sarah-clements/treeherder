@@ -10,8 +10,6 @@ export default class GenericTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: 0,
-      pageSize: 20,
       columnId: null,
       descending: null,
     };
@@ -19,15 +17,11 @@ export default class GenericTable extends React.Component {
   }
 
   updateTable(state) {
-    let { page, pageSize } = this.state;
+    const { page, pageSize, updateState } = this.props;
 
     // table's page count starts at 0
     if (state.page + 1 !== page || state.pageSize !== pageSize) {
-      page = state.page + 1;
-      pageSize = state.pageSize;
-
-      this.props.updateState({ page, pageSize }, true);
-      this.setState({ page, pageSize });
+      updateState({ page: state.page + 1, pageSize: state.pageSize }, true);
     } else if (state.sorted.length > 0) {
       this.setState({ columnId: state.sorted[0].id, descending: state.sorted[0].desc });
     }
@@ -69,6 +63,8 @@ GenericTable.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   updateState: PropTypes.func.isRequired,
   totalPages: PropTypes.number,
+  page: PropTypes.number.isRequired,
+  pageSize: PropTypes.number.isRequired,
 };
 
 GenericTable.defaultProps = {

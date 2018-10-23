@@ -172,8 +172,8 @@ const withView = defaultState => WrappedComponent =>
   }
 
   render() {
-    const updateState = { updateState: this.updateState };
-    const newProps = { ...this.props, ...this.state, ...updateState };
+    const methods = { updateState: this.updateState, getTableData: this.getTableData };
+    const newProps = { ...this.props, ...this.state, ...methods };
     return (
       <WrappedComponent {...newProps} />
     );

@@ -314,6 +314,8 @@ class FailuresQueryParamsSerializer(serializers.Serializer):
     endday = serializers.DateTimeField(format='%Y-%m-%d', input_formats=['%Y-%m-%d'])
     tree = serializers.CharField()
     bug = serializers.IntegerField(required=False, allow_null=True, default=None)
+    desc = serializers.BooleanField(required=False, default=False)
+    column = serializers.CharField(required=False, allow_null=True, default=None)
 
     def validate_bug(self, bug):
         if bug is None and self.context == 'requireBug':

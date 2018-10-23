@@ -54,6 +54,28 @@ class FailuresByBug(generics.ListAPIView):
     pagination_class = CustomPagePagination
     queryset = None
 
+    def set_order(self, column, desc):
+        order = None
+        field_map = {
+            'platform': 'job__machine_platform__platform',
+            'revision': 'job__push__revision',
+            'tree': 'job__repository__name',
+            'push_time': 'job__push__time',
+            'machine_name': 'job__machine__name',
+            'build_type': 'job__option_collection_hash',
+            'test_suite': 'job__signature__job_type_name',
+        }
+
+        if column and column in field_map:
+            order = field_map[column]
+        elif column:
+            order = column
+
+        if desc and order:
+            order = '-{}'.format(order)
+
+        return order or '-job__push__time'
+
     def list(self, request):
         query_params = FailuresQueryParamsSerializer(data=request.query_params,
                                                      context='requireBug')
@@ -65,6 +87,9 @@ class FailuresByBug(generics.ListAPIView):
         endday = get_end_of_day(query_params.validated_data['endday'])
         repo = query_params.validated_data['tree']
         bug_id = query_params.validated_data['bug']
+        column = query_params.validated_data['column']
+        desc = query_params.validated_data['desc']
+        order = self.set_order(column, desc)
 
         self.queryset = (BugJobMap.failures.by_date(startday, endday)
                                   .by_repo(repo)
@@ -73,7 +98,7 @@ class FailuresByBug(generics.ListAPIView):
                                           'bug_id', 'job_id', 'job__push__time', 'job__push__revision',
                                           'job__signature__job_type_name', 'job__option_collection_hash',
                                           'job__machine__name')
-                                  .order_by('-job__push__time'))
+                                  .order_by(order))
 
         lines = (TextLogError.objects.filter(step__job_id__in=self.queryset.values_list('job_id', flat=True),
                                              line__contains='TEST-UNEXPECTED-FAIL')

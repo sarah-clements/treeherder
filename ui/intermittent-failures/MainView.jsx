@@ -13,7 +13,7 @@ import DateRangePicker from './DateRangePicker';
 
 const MainView = (props) => {
   const { graphData, tableData, initialParamsSet, startday, endday, updateState,
-    tree, location, updateAppState } = props;
+    tree, location, updateAppState, page, pageSize } = props;
 
   const columns = [
     {
@@ -87,6 +87,8 @@ const MainView = (props) => {
           columns={columns}
           data={tableData.results}
           updateState={updateState}
+          page={page}
+          pageSize={pageSize}
         />
       }
       datePicker={

@@ -1,21 +1,24 @@
-import 'react-table/react-table.css';
-
 import React from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import Icon from 'react-fontawesome';
+import ReactTable from 'react-table';
 
-import { calculateMetrics, prettyDate } from './helpers';
-import { bugDetailsEndpoint, getJobsUrl } from '../helpers/url';
+import { calculateMetrics, prettyDate, tableRowStyling } from './helpers';
+import { bugDetailsEndpoint, getJobsUrl, createApiUrl } from '../helpers/url';
 import BugLogColumn from './BugLogColumn';
 import Layout from './Layout';
-import GenericTable from './GenericTable';
 import withView from './View';
 import DateOptions from './DateOptions';
 
+const defaultState = {
+  route: '/bugdetails',
+  endpoint: bugDetailsEndpoint,
+};
+
 const BugDetailsView = (props) => {
-  const { graphData, tableData, initialParamsSet, startday, endday, updateState, bug,
-    summary, errorMessages, lastLocation, tableFailureStatus, graphFailureStatus } = props;
+  const { graphData, tableData, initialParamsSet, startday, endday, updateState, bug, tree, page, pageSize,
+    summary, errorMessages, lastLocation, tableFailureStatus, graphFailureStatus, getTableData } = props;
 
     const columns = [
     {
@@ -71,6 +74,15 @@ const BugDetailsView = (props) => {
     ({ graphOneData, graphTwoData } = calculateMetrics(graphData));
   }
 
+  const updateTable = (state) => {
+    if (state.page + 1 !== page || state.pageSize !== pageSize) {
+      updateState({ page: state.page + 1, pageSize: state.pageSize }, true);
+    } else if (state.sorted.length > 0) {
+      const params = { bug, startday, endday, tree, page, page_size: pageSize, column: state.sorted[0].id, desc: state.sorted[0].desc };
+      getTableData(createApiUrl(defaultState.endpoint, params));
+    }
+  };
+
   return (
     <Layout
       {...props}
@@ -106,11 +118,16 @@ const BugDetailsView = (props) => {
       }
       table={
         bug && initialParamsSet &&
-        <GenericTable
-          totalPages={tableData.total_pages}
-          columns={columns}
+        <ReactTable
+          manual
           data={tableData.results}
-          updateState={updateState}
+          onFetchData={state => updateTable(state)}
+          pages={tableData.total_pages}
+          showPageSizeOptions
+          columns={columns}
+          className="-striped"
+          getTrProps={tableRowStyling}
+          showPaginationTop
         />
       }
       datePicker={
@@ -120,11 +137,6 @@ const BugDetailsView = (props) => {
       }
     />
   );
-};
-
-const defaultState = {
-  route: '/bugdetails',
-  endpoint: bugDetailsEndpoint,
 };
 
 export default withView(defaultState)(BugDetailsView);
