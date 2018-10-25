@@ -111,17 +111,19 @@ const withView = defaultState => WrappedComponent =>
     let min = 0;
     let max = 800;
     let bugsList = [];
+    const results = [];
 
     while (bugIds.length >= min) {
       const batch = bugIds.slice(min, max + 1);
       urlParams.id = batch.join();
-      const results = await getData(bugzillaBugsApi('bug', urlParams)); // eslint-disable-no-await-in-loop
+      results.push(getData(bugzillaBugsApi('bug', urlParams)));
 
-      if (results.data.bugs.length) {
-        bugsList = [...bugsList, ...results.data.bugs];
-      }
       min = max;
       max += 800;
+    }
+
+    for (const result of await Promise.all(results)) {
+      bugsList = [...bugsList, ...result.data.bugs];
     }
     return bugsList;
   }
