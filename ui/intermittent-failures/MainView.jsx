@@ -2,18 +2,19 @@ import React from 'react';
 import { Row, Col } from 'reactstrap';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 
 import BugColumn from './BugColumn';
-import { calculateMetrics, prettyDate, ISODate } from './helpers';
+import { calculateMetrics, prettyDate, ISODate, tableRowStyling } from './helpers';
 import { bugsEndpoint } from '../helpers/url';
-import GenericTable from './GenericTable';
 import withView from './View';
 import Layout from './Layout';
 import DateRangePicker from './DateRangePicker';
 
 const MainView = (props) => {
   const { graphData, tableData, initialParamsSet, startday, endday, updateState,
-    tree, location, updateAppState, page, pageSize } = props;
+    tree, location, updateAppState } = props;
 
   const columns = [
     {
@@ -81,14 +82,15 @@ const MainView = (props) => {
         </React.Fragment>
       }
       table={
-        initialParamsSet &&
-        <GenericTable
-          totalPages={tableData.total_pages}
+        initialParamsSet && tableData.length &&
+        <ReactTable
+          data={tableData}
+          showPageSizeOptions
           columns={columns}
-          data={tableData.results}
-          updateState={updateState}
-          page={page}
-          pageSize={pageSize}
+          className="-striped"
+          getTrProps={tableRowStyling}
+          showPaginationTop
+          filterable
         />
       }
       datePicker={

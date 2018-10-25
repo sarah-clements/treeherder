@@ -72,6 +72,7 @@ const withView = defaultState => WrappedComponent =>
 
       this.setState({ initialParamsSet: true });
       this.getGraphData(createApiUrl(graphsEndpoint, params));
+      this.getTableData(createApiUrl(defaultState.endpoint, params));
     }
   }
 
@@ -86,24 +87,43 @@ const withView = defaultState => WrappedComponent =>
     this.setState({ tableFailureStatus: null, isFetchingTable: true });
     const { data, failureStatus } = await getData(url);
 
-    if (defaultState.route === '/main' && !failureStatus && data.results.length) {
-      const bugs_list = formatBugs(data.results);
-      const bugzillaUrl = bugzillaBugsApi('bug', {
-        include_fields: 'id,status,summary,whiteboard',
-        id: bugs_list,
-      });
-      const bugzillaData = await getData(bugzillaUrl);
-      const results = mergeData(data.results, bugzillaData.data.bugs);
+    if (defaultState.route === '/main' && !failureStatus && data.length) {
+      const bugIds = formatBugs(data);
+      const bugzillaData = await this.batchBugRequests(bugIds);
+      const results = mergeData(data, bugzillaData);
       data.results = results;
     }
 
-    this.setState({ tableData: data, tableFailureStatus: failureStatus, isFetchingTable: false });
+    this.setState({ tableData: data.results, tableFailureStatus: failureStatus, isFetchingTable: false });
   }
 
   async getGraphData(url) {
     this.setState({ graphFailureStatus: null, isFetchingGraphs: true });
     const { data, failureStatus } = await getData(url);
     this.setState({ graphData: data, graphFailureStatus: failureStatus, isFetchingGraphs: false });
+  }
+
+  async batchBugRequests(bugIds) {
+    const urlParams = {
+      include_fields: 'id,status,summary,whiteboard',
+    };
+
+    let min = 0;
+    let max = 800;
+    let bugsList = [];
+
+    while (bugIds.length >= min) {
+      const batch = bugIds.slice(min, max + 1);
+      urlParams.id = batch.join();
+      const results = await getData(bugzillaBugsApi('bug', urlParams)); // eslint-disable-no-await-in-loop
+
+      if (results.data.bugs.length) {
+        bugsList = [...bugsList, ...results.data.bugs];
+      }
+      min = max;
+      max += 800;
+    }
+    return bugsList;
   }
 
   updateState(updatedObj, updateTable = false) {
@@ -137,8 +157,8 @@ const withView = defaultState => WrappedComponent =>
 
     // the table library fetches data directly when its component mounts and in response
     // to a user selecting pagesize or page; this condition will prevent duplicate requests
-    // when this component mounts and when the table mounts.
-    if (urlChanged) {
+    // when this component mounts and when the table mounts in bugdetails view.
+    if (urlChanged || defaultState.route === '/main') {
       this.getTableData(createApiUrl(defaultState.endpoint, params));
     }
 
