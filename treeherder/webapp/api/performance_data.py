@@ -30,31 +30,38 @@ from .performance_serializers import (IssueTrackerSerializer,
                                       PerformanceAlertSerializer,
                                       PerformanceAlertSummarySerializer,
                                       PerformanceBugTemplateSerializer,
-                                      PerformanceFrameworkSerializer)
+                                      PerformanceFrameworkSerializer, PerformanceSignatureSerializer)
 
 
 class PerformanceSignatureViewSet(viewsets.ViewSet):
+    serializer_class = PerformanceSignatureSerializer
 
     def list(self, request, project):
-        repository = models.Repository.objects.get(name=project)
-
-        signature_data = PerformanceSignature.objects.filter(
-            repository=repository).select_related(
-                'parent_signature__signature_hash', 'option_collection',
-                'platform')
-
         parent_signature_hashes = request.query_params.getlist('parent_signature')
-        if parent_signature_hashes:
-            parent_signatures = PerformanceSignature.objects.filter(
-                repository=repository,
-                signature_hash__in=parent_signature_hashes)
-            signature_data = signature_data.filter(
-                parent_signature__in=parent_signatures)
-
-        if not int(request.query_params.get('subtests', True)):
-            signature_data = signature_data.filter(parent_signature__isnull=True)
-
+        subtests = int(request.query_params.get('subtests', True))
         signature_ids = request.query_params.getlist('id')
+        signature_hashes = request.query_params.getlist('signature')
+        frameworks = request.query_params.getlist('framework')
+        interval = request.query_params.get('interval')
+        platform = request.query_params.get('platform')
+
+        #TODO these aren't being used
+        start_date = request.query_params.get('start_date')  # 'YYYY-MM-DDTHH:MM:SS
+        end_date = request.query_params.get('end_date')  # 'YYYY-MM-DDTHH:MM:SS'
+
+        signature_data = (PerformanceSignature.objects.select_related('parent_signature', 'option_collection',
+                                                                    'platform', 'repository')
+                                                                    .filter(repository__name=project))
+
+        if parent_signature_hashes:
+            parent_signatures = PerformanceSignature.objects.filter(repository=repository,
+                                                                    signature_hash__in=parent_signature_hashes)
+            signature_data = signature_data.filter(parent_signature__in=parent_signatures)
+
+        if not subtests:
+            signature_data = signature_data.filter(parent_signature__isnull=True)
+        
+        #should be handled in serializer
         if signature_ids:
             try:
                 signature_data = signature_data.filter(id__in=map(int,
@@ -63,41 +70,34 @@ class PerformanceSignatureViewSet(viewsets.ViewSet):
                 return Response({"message": "One or more id values invalid (must be integer)"
                                  }, status=HTTP_400_BAD_REQUEST)
 
-        signature_hashes = request.query_params.getlist('signature')
         if signature_hashes:
-            signature_data = signature_data.filter(
-                signature_hash__in=signature_hashes)
+            signature_data = signature_data.filter(signature_hash__in=signature_hashes)
 
-        frameworks = request.query_params.getlist('framework')
         if frameworks:
-            signature_data = signature_data.filter(
-                framework__in=frameworks)
+            signature_data = signature_data.filter(framework__in=frameworks)
 
-        interval = request.query_params.get('interval')
-        start_date = request.query_params.get('start_date')  # 'YYYY-MM-DDTHH:MM:SS
-        end_date = request.query_params.get('end_date')  # 'YYYY-MM-DDTHH:MM:SS'
+        # handle in serializer
         if interval and (start_date or end_date):
             return Response({"message": "Provide either interval only -or- start (and end) date"},
                             status=HTTP_400_BAD_REQUEST)
 
         if interval:
-            signature_data = signature_data.filter(
-                last_updated__gte=datetime.datetime.utcfromtimestamp(
-                    int(time.time() - int(interval))))
-
+            signature_data = signature_data.filter(last_updated__gte=datetime.datetime.utcfromtimestamp(
+                                                   int(time.time() - int(interval))))
+        # TODO not currently being used
         if start_date:
             signature_data = signature_data.filter(last_updated__gte=start_date)
         if end_date:
             signature_data = signature_data.filter(last_updated__lte=end_date)
 
-        platform = request.query_params.get('platform')
+        # TODO not sure this is being used
         if platform:
-            platforms = models.MachinePlatform.objects.filter(
-                platform=platform)
-            signature_data = signature_data.filter(
-                platform__in=platforms)
+            # Is it ever more than one?
+            signature_data = (signature_data.select_related('machine_platform')
+                                            .filter(platform__platform=platform))
 
         ret = {}
+
         for (id, signature_hash, option_collection_hash, platform, framework,
              suite, test, lower_is_better, extra_options,
              has_subtests, parent_signature_hash) in signature_data.values_list(
@@ -135,6 +135,110 @@ class PerformanceSignatureViewSet(viewsets.ViewSet):
                 ret[signature_hash]['extra_options'] = extra_options.split(' ')
 
         return Response(ret)
+
+# class PerformanceSignatureViewSet(viewsets.ViewSet):
+
+#     def list(self, request, project):
+#         repository = models.Repository.objects.get(name=project)
+#         print(project)
+#         signature_data = PerformanceSignature.objects.filter(
+#             repository=repository).select_related(
+#                 'parent_signature__signature_hash', 'option_collection',
+#                 'platform')
+
+#         parent_signature_hashes = request.query_params.getlist('parent_signature')
+#         if parent_signature_hashes:
+#             parent_signatures = PerformanceSignature.objects.filter(
+#                 repository=repository,
+#                 signature_hash__in=parent_signature_hashes)
+#             signature_data = signature_data.filter(
+#                 parent_signature__in=parent_signatures)
+
+#         if not int(request.query_params.get('subtests', True)):
+#             signature_data = signature_data.filter(parent_signature__isnull=True)
+
+#         signature_ids = request.query_params.getlist('id')
+#         if signature_ids:
+#             try:
+#                 signature_data = signature_data.filter(id__in=map(int,
+#                                                                   signature_ids))
+#             except ValueError:
+#                 return Response({"message": "One or more id values invalid (must be integer)"
+#                                  }, status=HTTP_400_BAD_REQUEST)
+
+#         signature_hashes = request.query_params.getlist('signature')
+#         if signature_hashes:
+#             signature_data = signature_data.filter(
+#                 signature_hash__in=signature_hashes)
+
+#         frameworks = request.query_params.getlist('framework')
+#         if frameworks:
+#             signature_data = signature_data.filter(
+#                 framework__in=frameworks)
+
+#         interval = request.query_params.get('interval')
+#         #TODO these aren't being used
+#         start_date = request.query_params.get('start_date')  # 'YYYY-MM-DDTHH:MM:SS
+#         end_date = request.query_params.get('end_date')  # 'YYYY-MM-DDTHH:MM:SS'
+#         if interval and (start_date or end_date):
+#             return Response({"message": "Provide either interval only -or- start (and end) date"},
+#                             status=HTTP_400_BAD_REQUEST)
+
+#         if interval:
+#             signature_data = signature_data.filter(
+#                 last_updated__gte=datetime.datetime.utcfromtimestamp(
+#                     int(time.time() - int(interval))))
+
+#         if start_date:
+#             signature_data = signature_data.filter(last_updated__gte=start_date)
+#         if end_date:
+#             signature_data = signature_data.filter(last_updated__lte=end_date)
+
+#         platform = request.query_params.get('platform')
+#         if platform:
+#             platforms = models.MachinePlatform.objects.filter(
+#                 platform=platform)
+#             signature_data = signature_data.filter(
+#                 platform__in=platforms)
+
+#         ret = {}
+#         for (id, signature_hash, option_collection_hash, platform, framework,
+#              suite, test, lower_is_better, extra_options,
+#              has_subtests, parent_signature_hash) in signature_data.values_list(
+#                  'id',
+#                  'signature_hash',
+#                  'option_collection__option_collection_hash',
+#                  'platform__platform', 'framework', 'suite',
+#                  'test', 'lower_is_better',
+#                  'extra_options', 'has_subtests',
+#                  'parent_signature__signature_hash').distinct():
+#             ret[signature_hash] = {
+#                 'id': id,
+#                 'framework_id': framework,
+#                 'option_collection_hash': option_collection_hash,
+#                 'machine_platform': platform,
+#                 'suite': suite
+#             }
+#             if not lower_is_better:
+#                 # almost always true, save some banwidth by assuming that by
+#                 # default
+#                 ret[signature_hash]['lower_is_better'] = False
+#             if test:
+#                 # test may be empty in case of a summary test, leave it empty
+#                 # then
+#                 ret[signature_hash]['test'] = test
+#             if has_subtests:
+#                 ret[signature_hash]['has_subtests'] = True
+#             if parent_signature_hash:
+#                 # this value is often null, save some bandwidth by excluding
+#                 # it if not present
+#                 ret[signature_hash]['parent_signature'] = parent_signature_hash
+
+#             if extra_options:
+#                 # extra_options stored as charField but api returns as list
+#                 ret[signature_hash]['extra_options'] = extra_options.split(' ')
+
+#         return Response(ret)
 
 
 class PerformancePlatformViewSet(viewsets.ViewSet):
