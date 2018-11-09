@@ -34,8 +34,22 @@ from .performance_serializers import (IssueTrackerSerializer,
 
 
 class PerformanceSignatureViewSet(viewsets.ViewSet):
-    serializer_class = PerformanceSignatureSerializer
-
+#     {
+#     id: signatureProps.id,
+#     name: getSeriesName(signatureProps, optionCollectionMap),
+#     testName: getTestName(signatureProps), // unadorned with platform/option info
+#     suite: signatureProps.suite,
+#     test: signatureProps.test || null,
+#     signature,
+#     hasSubtests: signatureProps.has_subtests || false,
+#     parentSignature: signatureProps.parent_signature || null,
+#     projectName,
+#     platform,
+#     options,
+#     frameworkId: signatureProps.framework_id,
+#     lowerIsBetter: (signatureProps.lower_is_better === undefined ||
+#       signatureProps.lower_is_better),
+#   };
     def list(self, request, project):
         parent_signature_hashes = request.query_params.getlist('parent_signature')
         subtests = int(request.query_params.get('subtests', True))
@@ -44,6 +58,7 @@ class PerformanceSignatureViewSet(viewsets.ViewSet):
         frameworks = request.query_params.getlist('framework')
         interval = request.query_params.get('interval')
         platform = request.query_params.get('platform')
+        by_signature = request.query_params.get('by_signature')
 
         #TODO these aren't being used
         start_date = request.query_params.get('start_date')  # 'YYYY-MM-DDTHH:MM:SS
@@ -64,8 +79,7 @@ class PerformanceSignatureViewSet(viewsets.ViewSet):
         #should be handled in serializer
         if signature_ids:
             try:
-                signature_data = signature_data.filter(id__in=map(int,
-                                                                  signature_ids))
+                signature_data = signature_data.filter(id__in=map(int, signature_ids))
             except ValueError:
                 return Response({"message": "One or more id values invalid (must be integer)"
                                  }, status=HTTP_400_BAD_REQUEST)
@@ -96,45 +110,52 @@ class PerformanceSignatureViewSet(viewsets.ViewSet):
             signature_data = (signature_data.select_related('machine_platform')
                                             .filter(platform__platform=platform))
 
-        ret = {}
+        hash_query = (models.OptionCollection.objects.select_related('option')
+                                                     .values('option__name', 'option_collection_hash'))
+
+        resp_data = []
+
+        # if by_signature:
+            #TODO fetch data values
+
+        data = (signature_data.values_list('id', 'signature_hash',
+                                           'option_collection__option_collection_hash',
+                                           'platform__platform', 'framework', 'suite',
+                                           'test', 'lower_is_better',
+                                           'extra_options', 'has_subtests',
+                                           'parent_signature__signature_hash')
+                                           .distinct())
 
         for (id, signature_hash, option_collection_hash, platform, framework,
-             suite, test, lower_is_better, extra_options,
-             has_subtests, parent_signature_hash) in signature_data.values_list(
-                 'id',
-                 'signature_hash',
-                 'option_collection__option_collection_hash',
-                 'platform__platform', 'framework', 'suite',
-                 'test', 'lower_is_better',
-                 'extra_options', 'has_subtests',
-                 'parent_signature__signature_hash').distinct():
-            ret[signature_hash] = {
+            suite, test, lower_is_better, extra_options,
+            has_subtests, parent_signature_hash) in data:
+
+            #TODO option_collection_hash lookup in hash_query
+            entry = {
                 'id': id,
-                'framework_id': framework,
-                'option_collection_hash': option_collection_hash,
-                'machine_platform': platform,
-                'suite': suite
+                # 'name': getSeriesName(signatureProps, optionCollectionMap),
+                # 'testName': getTestName(signatureProps),
+                'suite': suite,
+                'test': test if test else None,
+                'signature': signature_hash,
+                'hasSubtests': True if has_subtests else False,
+                'parentSignature': parent_signature_hash if parent_signature_hash else None,
+                # 'projectName',
+                'platform': platform,
+                'options': extra_options.split(' ') if extra_options else [],
+                'frameworkId': framework,
+                'lowerIsBetter': True if lower_is_better else False,
             }
-            if not lower_is_better:
-                # almost always true, save some banwidth by assuming that by
-                # default
-                ret[signature_hash]['lower_is_better'] = False
-            if test:
-                # test may be empty in case of a summary test, leave it empty
-                # then
-                ret[signature_hash]['test'] = test
-            if has_subtests:
-                ret[signature_hash]['has_subtests'] = True
-            if parent_signature_hash:
-                # this value is often null, save some bandwidth by excluding
-                # it if not present
-                ret[signature_hash]['parent_signature'] = parent_signature_hash
 
-            if extra_options:
-                # extra_options stored as charField but api returns as list
-                ret[signature_hash]['extra_options'] = extra_options.split(' ')
+            if by_signature:
+                item = { signature_hash: entry }
+                # TODO add list of values
+                resp_data.append(item)
+            else:
+                resp_data.append(entry)
 
-        return Response(ret)
+        return Response(resp_data)
+
 
 # class PerformanceSignatureViewSet(viewsets.ViewSet):
 
