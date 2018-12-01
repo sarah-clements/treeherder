@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import transaction
 from rest_framework import (exceptions,
                             filters,
+                            generics,
                             pagination,
                             viewsets)
 from rest_framework.response import Response
@@ -30,7 +31,72 @@ from .performance_serializers import (IssueTrackerSerializer,
                                       PerformanceAlertSerializer,
                                       PerformanceAlertSummarySerializer,
                                       PerformanceBugTemplateSerializer,
-                                      PerformanceFrameworkSerializer)
+                                      PerformanceFrameworkSerializer,
+                                      PerformanceQueryParamsSerializer,
+                                      PerformanceRevisionSerializer)
+
+
+class PerformanceByRevision(generics.ListAPIView):
+
+    serializer_class = PerformanceRevisionSerializer
+    queryset = None
+
+    def list(self, request):
+        query_params = PerformanceQueryParamsSerializer(data=request.query_params)
+        if not query_params.is_valid():
+            return Response(data=query_params.errors,
+                            status=HTTP_400_BAD_REQUEST)
+
+        startday = query_params.validated_data['startday']
+        endday = query_params.validated_data['endday']
+        revision = query_params.validated_data['revision']
+        repository = query_params.validated_data['repository']
+        interval = query_params.validated_data['interval']
+        frameworks = query_params.validated_data['framework']
+        parent_signature = query_params.validated_data['parent_signature']
+        signature = query_params.validated_data['signature']
+        no_subtests = query_params.validated_data['no_subtests']
+
+        signature_data = (PerformanceSignature.objects
+                                              .select_related('framework', 'repository', 'platform', 'push')
+                                              .filter(repository__name=repository, framework__in=frameworks,
+                                                      parent_signature__isnull=no_subtests))
+        if parent_signature:
+            signature_data = signature_data.filter(parent_signature__signature_hash=parent_signature)
+
+        if signature:
+            signature_data = signature_data.filter(signature_hash=signature)
+
+        if interval:
+            signature_data = signature_data.filter(last_updated__gte=datetime.datetime.utcfromtimestamp(
+                                                   int(time.time() - int(interval))))
+
+        signature_ids = signature_data.values_list('id', flat=True)
+
+        self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests', 'extra_options', 'suite',
+                                               'signature_hash', 'platform__platform', 'test', 'option_collection__option__name',
+                                               'parent_signature__signature_hash'))
+
+        data = (PerformanceDatum.objects.select_related('push', 'repository')
+                                .filter(signature_id__in=signature_ids, repository__name=repository))
+
+        if revision:
+            data = data.filter(push_id=revision)
+        else:
+            data = data.filter(push_timestamp__range=(startday, endday))
+
+        values = data.values_list('signature_id', 'value')
+
+        grouped_values = defaultdict(list)
+        for signature_id, value in values:
+            if value is not None:
+                grouped_values[signature_id].append(value)
+
+        for item in self.queryset:
+            item['values'] = grouped_values.get(item['id'], [])
+
+        serializer = self.get_serializer(self.queryset, many=True)
+        return Response(data=serializer.data)
 
 
 class PerformanceSignatureViewSet(viewsets.ViewSet):
