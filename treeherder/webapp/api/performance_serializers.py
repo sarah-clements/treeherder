@@ -10,6 +10,14 @@ from treeherder.perf.models import (IssueTracker,
                                     PerformanceFramework,
                                     PerformanceSignature)
 
+class PerformanceRevisionSerializer(serializers.ModelSerializer):
+    machine_platform = serializers.SlugRelatedField(read_only=True,
+                                                    slug_field="platform",
+                                                    source="platform")
+    class Meta:
+        model = PerformanceSignature
+        fields = ['id', 'framework_id', 'signature_hash', 'machine_platform',
+                  'suite', 'test', 'lower_is_better', 'has_subtests']
 
 class PerformanceFrameworkSerializer(serializers.ModelSerializer):
     class Meta:

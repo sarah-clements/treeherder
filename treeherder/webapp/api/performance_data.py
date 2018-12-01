@@ -10,7 +10,7 @@ from django.db import transaction
 from rest_framework import (exceptions,
                             filters,
                             pagination,
-                            viewsets)
+                            viewsets, generics)
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 
@@ -30,7 +30,35 @@ from .performance_serializers import (IssueTrackerSerializer,
                                       PerformanceAlertSerializer,
                                       PerformanceAlertSummarySerializer,
                                       PerformanceBugTemplateSerializer,
-                                      PerformanceFrameworkSerializer)
+                                      PerformanceFrameworkSerializer,
+                                      PerformanceRevisionSerializer)
+
+
+class PerformanceByRevision(generics.ListAPIView):
+
+    serializer_class = PerformanceRevisionSerializer
+    queryset = None
+
+    def list(self, request):
+        interval = request.query_params.get('interval')
+        repository = request.query_params.get('repository')
+        frameworks = request.query_params.getlist('framework')
+        platform = request.query_params.get('platform')
+        subtests = request.query_params.get('subtests', True)
+        # parent_signature = request.query_params.get('parent_signature')
+        # signature = request.query_params.get('signature')
+        print(interval, repository, platform, frameworks)
+        self.queryset = (PerformanceSignature.objects
+                                             .select_related('framework', 'repository', 'platform')
+                                             .filter(repository__name=repository,
+                                                     framework__in=frameworks,
+                                                    #  platform__platform=platform,
+                                                    #  parent_signature__isnull=False,
+                                                     last_updated__gte=datetime.datetime.utcfromtimestamp(
+                                                     int(time.time() - int(interval)))))
+
+        serializer = self.get_serializer(self.queryset, many=True)
+        return Response(data=serializer.data)
 
 
 class PerformanceSignatureViewSet(viewsets.ViewSet):
