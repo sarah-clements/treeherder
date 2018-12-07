@@ -51,7 +51,7 @@ class PerformanceByRevision(generics.ListAPIView):
         # if revision is None, startday and endday is required
         # for subtests view, only signature or parent_signature and frameworks params are needed
         signature_data = (PerformanceSignature.objects
-                                             .select_related('framework', 'repository', 'platform')
+                                             .select_related('framework', 'repository', 'platform', 'push')
                                              .filter(repository__name=repository,
                                                      framework__in=frameworks,
                                                      last_updated__gte=datetime.datetime.utcfromtimestamp(
@@ -60,13 +60,12 @@ class PerformanceByRevision(generics.ListAPIView):
         signature_ids = signature_data.values_list('id', flat=True)
         self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests',
                                                'signature_hash', 'platform__platform', 'test'))
+        # TODO: make migrations file
+        values = (PerformanceDatum.objects.select_related('push', 'repository')
+                                  .filter(signature_id__in=signature_ids, push__revision=revision, repository__name=repository)
+                                  .values_list('signature_id', 'value'))
 
-        values = (PerformanceDatum.objects.select_related('signature')
-                                  .values('signature__id')
-                                  .filter(signature__id__in=list(signature_ids), push__revision=revision)
-                                  .values_list('signature__id', 'value'))
-
-        
+        # TODO: don't do this for revision query param, only startday/endday
         grouped_values = defaultdict(list)
         for signature_id, value in values:
             if value is not None:
