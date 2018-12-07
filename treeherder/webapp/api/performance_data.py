@@ -43,31 +43,38 @@ class PerformanceByRevision(generics.ListAPIView):
         interval = request.query_params.get('interval')
         repository = request.query_params.get('repository')
         frameworks = request.query_params.getlist('framework')
-        platform = request.query_params.get('platform')
         subtests = request.query_params.get('subtests', True)
         startday = request.query_params.get('startday')
         endday = request.query_params.get('endday')
         revision = request.query_params.get('revision')
         # will need test lists and platform lists
-        self.queryset = (PerformanceSignature.objects
+        # if revision is None, startday and endday is required
+        # for subtests view, only signature or parent_signature and frameworks params are needed
+        signature_data = (PerformanceSignature.objects
                                              .select_related('framework', 'repository', 'platform')
                                              .filter(repository__name=repository,
                                                      framework__in=frameworks,
-                                                     platform__platform=platform,
                                                      last_updated__gte=datetime.datetime.utcfromtimestamp(
                                                      int(time.time() - int(interval)))))
-        signature_ids = self.queryset.values_list('id', flat=True)
+        
+        signature_ids = signature_data.values_list('id', flat=True)
+        self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests',
+                                               'signature_hash', 'platform__platform', 'test'))
 
         values = (PerformanceDatum.objects.select_related('signature')
-                                 .filter(signature__id__in=list(signature_ids), push__revision=revision)
-                                 .values_list('push__revision', 'value'))
+                                  .values('signature__id')
+                                  .filter(signature__id__in=list(signature_ids), push__revision=revision)
+                                  .values_list('signature__id', 'value'))
 
+        
         grouped_values = defaultdict(list)
-        for revision, value in values:
+        for signature_id, value in values:
             if value is not None:
-                grouped_values[revision].append(value)
+                grouped_values[signature_id].append(value)
 
-        print(grouped_values)
+        for item in self.queryset:
+            item['values'] = grouped_values.get(item['id'], [])
+
         serializer = self.get_serializer(self.queryset, many=True)
         return Response(data=serializer.data)
 

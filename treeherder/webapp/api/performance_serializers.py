@@ -11,13 +11,13 @@ from treeherder.perf.models import (IssueTracker,
                                     PerformanceSignature)
 
 class PerformanceRevisionSerializer(serializers.ModelSerializer):
-    machine_platform = serializers.SlugRelatedField(read_only=True,
-                                                    slug_field="platform",
-                                                    source="platform")
+    platform = serializers.CharField(source="platform__platform")
+    values = serializers.ListField(child=serializers.CharField())
+
     class Meta:
         model = PerformanceSignature
-        fields = ['id', 'framework_id', 'signature_hash', 'machine_platform',
-                  'suite', 'test', 'lower_is_better', 'has_subtests']
+        fields = ['id', 'framework_id', 'signature_hash', 'platform',
+                  'test', 'lower_is_better', 'has_subtests', 'values']
 
 class PerformanceFrameworkSerializer(serializers.ModelSerializer):
     class Meta:
