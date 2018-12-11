@@ -1,14 +1,41 @@
 import six
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import (exceptions,
                             serializers)
 
+from treeherder.model import models
 from treeherder.perf.models import (IssueTracker,
                                     PerformanceAlert,
                                     PerformanceAlertSummary,
                                     PerformanceBugTemplate,
                                     PerformanceFramework,
                                     PerformanceSignature)
+
+
+class PerformanceQueryParamsSerializer(serializers.Serializer):
+    startday = serializers.DateTimeField(required=False, allow_null=True, default=None, format='%Y-%m-%d', input_formats=['%Y-%m-%d'])
+    endday = serializers.DateTimeField(required=False, allow_null=True, default=None, format='%Y-%m-%d', input_formats=['%Y-%m-%d'])
+    revision = serializers.CharField(required=False, allow_null=True, default=None)
+    repository = serializers.CharField()
+    framework = serializers.CharField()
+    interval = serializers.IntegerField()
+
+    def validate(self, data):
+        if data['revision'] is None and (data['startday'] is None or data['endday'] is None):
+            raise serializers.ValidationError('Required: revision or startday and endday query parameters.')
+
+        return data
+
+    def validate_repository(self, repository):
+        try:
+            models.Repository.objects.get(name=repository)
+
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError('{} does not exist.'.format(repository))
+
+        return repository
+
 
 class PerformanceRevisionSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(source="platform__platform")

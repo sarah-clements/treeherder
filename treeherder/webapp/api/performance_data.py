@@ -31,7 +31,8 @@ from .performance_serializers import (IssueTrackerSerializer,
                                       PerformanceAlertSummarySerializer,
                                       PerformanceBugTemplateSerializer,
                                       PerformanceFrameworkSerializer,
-                                      PerformanceRevisionSerializer)
+                                      PerformanceRevisionSerializer,
+                                      PerformanceQueryParamsSerializer)
 
 
 class PerformanceByRevision(generics.ListAPIView):
@@ -40,29 +41,35 @@ class PerformanceByRevision(generics.ListAPIView):
     queryset = None
 
     def list(self, request):
-        interval = request.query_params.get('interval')
-        repository = request.query_params.get('repository')
-        frameworks = request.query_params.getlist('framework')
-        subtests = request.query_params.get('subtests', True)
-        startday = request.query_params.get('startday')
-        endday = request.query_params.get('endday')
-        revision = request.query_params.get('revision')
+        query_params = PerformanceQueryParamsSerializer(data=request.query_params)
+        if not query_params.is_valid():
+            return Response(data=query_params.errors,
+                            status=HTTP_400_BAD_REQUEST)
+
+        startday = query_params.validated_data['startday']
+        endday = query_params.validated_data['endday']
+        revision = query_params.validated_data['revision']
+        repository = query_params.validated_data['repository']
+        interval = query_params.validated_data['interval']
+        frameworks = query_params.validated_data['framework']
+        # TODO: 
+        # make migrations file
         # will need test lists and platform lists
-        # if revision is None, startday and endday is required
         # for subtests view, only signature or parent_signature and frameworks params are needed
+        # add tests
         signature_data = (PerformanceSignature.objects
                                              .select_related('framework', 'repository', 'platform', 'push')
                                              .filter(repository__name=repository,
                                                      framework__in=frameworks,
                                                      last_updated__gte=datetime.datetime.utcfromtimestamp(
                                                      int(time.time() - int(interval)))))
-        
+
         signature_ids = signature_data.values_list('id', flat=True)
         self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests',
                                                'signature_hash', 'platform__platform', 'test'))
-        # TODO: make migrations file
+
         values = (PerformanceDatum.objects.select_related('push', 'repository')
-                                  .filter(signature_id__in=signature_ids, push__revision=revision, repository__name=repository)
+                                  .filter(signature_id__in=signature_ids, push_id=revision, repository__name=repository)
                                   .values_list('signature_id', 'value'))
 
         # TODO: don't do this for revision query param, only startday/endday
