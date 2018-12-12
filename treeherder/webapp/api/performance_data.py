@@ -46,7 +46,7 @@ class PerformanceByRevision(generics.ListAPIView):
         if not query_params.is_valid():
             return Response(data=query_params.errors,
                             status=HTTP_400_BAD_REQUEST)
-
+        # TODO: determine if endday should have an inclusive enddate (using get_end_of_day helper)
         startday = query_params.validated_data['startday']
         endday = query_params.validated_data['endday']
         revision = query_params.validated_data['revision']
@@ -54,8 +54,6 @@ class PerformanceByRevision(generics.ListAPIView):
         interval = query_params.validated_data['interval']
         frameworks = query_params.validated_data['framework']
         # TODO:
-        # make migrations file
-        # will need test lists and platform lists from signature_data
         # for subtests view, only signature or parent_signature and frameworks params are needed
         # add tests
         signature_data = (PerformanceSignature.objects
@@ -69,11 +67,12 @@ class PerformanceByRevision(generics.ListAPIView):
         self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests', 'extra_options', 'suite',
                                                'signature_hash', 'platform__platform', 'test', 'option_collection__option__name'))
 
-        values = (PerformanceDatum.objects.select_related('push', 'repository')
-                                  .filter(signature_id__in=signature_ids, push_id=revision, repository__name=repository)
+        values = (PerformanceDatum.performance.select_related('push', 'repository')
+                                  .filter(signature_id__in=signature_ids, repository__name=repository)
+                                  .by_revision_or_dates(revision, startday, endday)
                                   .values_list('signature_id', 'value'))
-        print(values)
-        # TODO: don't do this for revision query param, only startday/endday
+
+        # TODO: don't do this for revision query param, only startday/endday?
         grouped_values = defaultdict(list)
         for signature_id, value in values:
             if value is not None:
