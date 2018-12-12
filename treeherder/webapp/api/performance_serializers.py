@@ -16,7 +16,7 @@ from treeherder.perf.models import (IssueTracker,
 class PerformanceQueryParamsSerializer(serializers.Serializer):
     startday = serializers.DateTimeField(required=False, allow_null=True, default=None, format='%Y-%m-%d', input_formats=['%Y-%m-%d'])
     endday = serializers.DateTimeField(required=False, allow_null=True, default=None, format='%Y-%m-%d', input_formats=['%Y-%m-%d'])
-    revision = serializers.CharField(required=False, allow_null=True, default=None)
+    revision = serializers.IntegerField(required=False, allow_null=True, default=None)
     repository = serializers.CharField()
     framework = serializers.CharField()
     interval = serializers.IntegerField()
@@ -40,10 +40,11 @@ class TestNameField(serializers.Field):
     """Creates a string from different fields"""
  
     def to_representation(self, value):
-        build_type = value['option_collection__option__name']
         test = value['test']
-        test_build = build_type if test == '' else '{} {}'.format(test, build_type)
-        return '{} {} {}'.format(value['suite'], test_build, value['extra_options'])
+        suite = value['suite']
+        test_suite = suite if test == '' or test == suite else '{} {}'.format(suite, test)
+        console.log(test_suite, value['option_collection__option__name'], value['extra_options'])
+        return '{} {} {}'.format(test_suite, value['option_collection__option__name'], value['extra_options'])
 
 
 class PerformanceRevisionSerializer(serializers.ModelSerializer):
