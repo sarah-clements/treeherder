@@ -140,7 +140,7 @@ into chunks of chunk_size size."""
 
 class PerformanceQuerySet(models.QuerySet):
     def by_revision_or_dates(self, revision, startday, endday):
-        if revision in query_params:
+        if revision:
             return self.filter(push__revision=revision)
 
         return self.filter(push_timestamp__range=(startday, endday))

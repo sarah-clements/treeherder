@@ -36,15 +36,27 @@ class PerformanceQueryParamsSerializer(serializers.Serializer):
 
         return repository
 
+class TestNameField(serializers.Field):
+    """Creates a string from different fields"""
+ 
+    def to_representation(self, value):
+        build_type = value['option_collection__option__name']
+        test = value['test']
+        test_build = build_type if test == '' else '{} {}'.format(test, build_type)
+        return '{} {} {}'.format(value['suite'], test_build, value['extra_options'])
+
 
 class PerformanceRevisionSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(source="platform__platform")
     values = serializers.ListField(child=serializers.CharField())
+    # build_type = serializers.CharField(source="option_collection__option__name")
+    name = TestNameField(source='*')
 
     class Meta:
         model = PerformanceSignature
         fields = ['id', 'framework_id', 'signature_hash', 'platform',
-                  'test', 'lower_is_better', 'has_subtests', 'values']
+                  'lower_is_better', 'has_subtests', 'values', 'name']
+
 
 class PerformanceFrameworkSerializer(serializers.ModelSerializer):
     class Meta:

@@ -9,8 +9,9 @@ from django.conf import settings
 from django.db import transaction
 from rest_framework import (exceptions,
                             filters,
+                            generics,
                             pagination,
-                            viewsets, generics)
+                            viewsets)
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 
@@ -31,8 +32,8 @@ from .performance_serializers import (IssueTrackerSerializer,
                                       PerformanceAlertSummarySerializer,
                                       PerformanceBugTemplateSerializer,
                                       PerformanceFrameworkSerializer,
-                                      PerformanceRevisionSerializer,
-                                      PerformanceQueryParamsSerializer)
+                                      PerformanceQueryParamsSerializer,
+                                      PerformanceRevisionSerializer)
 
 
 class PerformanceByRevision(generics.ListAPIView):
@@ -52,26 +53,26 @@ class PerformanceByRevision(generics.ListAPIView):
         repository = query_params.validated_data['repository']
         interval = query_params.validated_data['interval']
         frameworks = query_params.validated_data['framework']
-        # TODO: 
+        # TODO:
         # make migrations file
-        # will need test lists and platform lists
+        # will need test lists and platform lists from signature_data
         # for subtests view, only signature or parent_signature and frameworks params are needed
         # add tests
         signature_data = (PerformanceSignature.objects
-                                             .select_related('framework', 'repository', 'platform', 'push')
-                                             .filter(repository__name=repository,
-                                                     framework__in=frameworks,
-                                                     last_updated__gte=datetime.datetime.utcfromtimestamp(
-                                                     int(time.time() - int(interval)))))
+                                              .select_related('framework', 'repository', 'platform', 'push')
+                                              .filter(repository__name=repository,
+                                                      framework__in=frameworks,
+                                                      last_updated__gte=datetime.datetime.utcfromtimestamp(
+                                                      int(time.time() - int(interval)))))
 
         signature_ids = signature_data.values_list('id', flat=True)
-        self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests',
-                                               'signature_hash', 'platform__platform', 'test'))
+        self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests', 'extra_options', 'suite',
+                                               'signature_hash', 'platform__platform', 'test', 'option_collection__option__name'))
 
         values = (PerformanceDatum.objects.select_related('push', 'repository')
                                   .filter(signature_id__in=signature_ids, push_id=revision, repository__name=repository)
                                   .values_list('signature_id', 'value'))
-
+        print(values)
         # TODO: don't do this for revision query param, only startday/endday
         grouped_values = defaultdict(list)
         for signature_id, value in values:
