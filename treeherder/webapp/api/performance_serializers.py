@@ -19,7 +19,9 @@ class PerformanceQueryParamsSerializer(serializers.Serializer):
     revision = serializers.IntegerField(required=False, allow_null=True, default=None)
     repository = serializers.CharField()
     framework = serializers.CharField()
-    interval = serializers.IntegerField()
+    interval = serializers.IntegerField(required=False, allow_null=True, default=None)
+    signature = serializers.CharField(required=False, allow_null=True, default=None)
+    parent_signature = serializers.CharField(required=False, allow_null=True, default=None)
 
     def validate(self, data):
         if data['revision'] is None and (data['startday'] is None or data['endday'] is None):
@@ -43,19 +45,17 @@ class TestNameField(serializers.Field):
         test = value['test']
         suite = value['suite']
         test_suite = suite if test == '' or test == suite else '{} {}'.format(suite, test)
-        console.log(test_suite, value['option_collection__option__name'], value['extra_options'])
         return '{} {} {}'.format(test_suite, value['option_collection__option__name'], value['extra_options'])
 
 
 class PerformanceRevisionSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(source="platform__platform")
     values = serializers.ListField(child=serializers.CharField())
-    # build_type = serializers.CharField(source="option_collection__option__name")
     name = TestNameField(source='*')
 
     class Meta:
         model = PerformanceSignature
-        fields = ['id', 'framework_id', 'signature_hash', 'platform',
+        fields = ['id', 'framework_id', 'signature_hash', 'platform', 'test',
                   'lower_is_better', 'has_subtests', 'values', 'name']
 
 

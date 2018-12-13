@@ -53,31 +53,49 @@ class PerformanceByRevision(generics.ListAPIView):
         repository = query_params.validated_data['repository']
         interval = query_params.validated_data['interval']
         frameworks = query_params.validated_data['framework']
-        # TODO:
-        # for subtests view, only signature or parent_signature and frameworks params are needed
-        # add tests
-        signature_data = (PerformanceSignature.objects
-                                              .select_related('framework', 'repository', 'platform', 'push')
-                                              .filter(repository__name=repository,
-                                                      framework__in=frameworks,
-                                                      last_updated__gte=datetime.datetime.utcfromtimestamp(
-                                                      int(time.time() - int(interval)))))
+        parent_signature = query_params.validated_data['parent_signature']
+        signature = query_params.validated_data['signature']
 
+        # TODO: add tests
+        signature_data = (PerformanceSignature.objects
+                                              .select_related('framework', 'repository', 'platform', 'push', 'option_collection__option')
+                                              .filter(repository__name=repository, framework__in=frameworks))
+        if parent_signature:
+            signature_data.filter(parent_signature=parent_signature)
+        
+        if signature:
+            signature_data.filter(signature_hash=signature)
+
+        if interval:
+            signature_data.filter(last_updated__gte=datetime.datetime.utcfromtimestamp(
+                                  int(time.time() - int(interval))))
+        # if we have the signature id, do we even need to query perfSignature?
         signature_ids = signature_data.values_list('id', flat=True)
+
         self.queryset = (signature_data.values('framework_id', 'id', 'lower_is_better', 'has_subtests', 'extra_options', 'suite',
                                                'signature_hash', 'platform__platform', 'test', 'option_collection__option__name'))
 
-        values = (PerformanceDatum.performance.select_related('push', 'repository')
-                                  .filter(signature_id__in=signature_ids, repository__name=repository)
-                                  .by_revision_or_dates(revision, startday, endday)
-                                  .values_list('signature_id', 'value'))
+        data = (PerformanceDatum.objects.select_related('push', 'repository')
+                                .filter(signature_id__in=signature_ids, repository__name=repository))
 
-        # TODO: don't do this for revision query param, only startday/endday?
+        if revision:
+            data.filter(push_id=revision)
+        else:
+            data.filter(push_timestamp__range=(startday, endday))
+
+        values = data.values_list('signature_id', 'value')
+
+        #TODO remove queryset manager
+        # values = (PerformanceDatum.performance.select_related('push', 'repository')
+        #                           .filter(signature_id__in=signature_ids, repository__name=repository)
+        #                           .by_revision_or_dates(revision, startday, endday)
+        #                           .values_list('signature_id', 'value'))
+
         grouped_values = defaultdict(list)
         for signature_id, value in values:
             if value is not None:
                 grouped_values[signature_id].append(value)
-
+ 
         for item in self.queryset:
             item['values'] = grouped_values.get(item['id'], [])
 
