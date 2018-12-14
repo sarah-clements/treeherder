@@ -83,7 +83,7 @@ class PerformanceByRevision(generics.ListAPIView):
         if revision:
             data = data.filter(push_id=revision)
         else:
-            data = data.filter(push_timestamp__range=(startday, endday))
+            data = data.filter(push_timestamp__gt=startday, push_timestamp__lt=endday)
 
         values = data.values_list('signature_id', 'value')
 

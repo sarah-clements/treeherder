@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import (exceptions,
                             serializers)
-
+import decimal
 from treeherder.model import models
 from treeherder.perf.models import (IssueTracker,
                                     PerformanceAlert,
@@ -52,7 +52,8 @@ class TestNameField(serializers.Field):
 
 class PerformanceRevisionSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(source="platform__platform")
-    values = serializers.ListField(child=serializers.CharField())
+    values = serializers.ListField(child=serializers.DecimalField(
+        rounding=decimal.ROUND_HALF_EVEN, decimal_places=2, max_digits=None, coerce_to_string=False))
     name = TestNameField(source="*")
     parent_signature = serializers.CharField(source="parent_signature__signature_hash")
 
