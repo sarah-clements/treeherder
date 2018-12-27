@@ -1,9 +1,11 @@
+import decimal
+
 import six
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import (exceptions,
                             serializers)
-import decimal
+
 from treeherder.model import models
 from treeherder.perf.models import (IssueTracker,
                                     PerformanceAlert,
@@ -20,7 +22,6 @@ class PerformanceQueryParamsSerializer(serializers.Serializer):
     repository = serializers.CharField()
     framework = serializers.ListField(child=serializers.IntegerField())
     interval = serializers.IntegerField(required=False, allow_null=True, default=None)
-    signature = serializers.CharField(required=False, allow_null=True, default=None)
     parent_signature = serializers.CharField(required=False, allow_null=True, default=None)
     no_subtests = serializers.BooleanField(required=False)
 
@@ -40,27 +41,24 @@ class PerformanceQueryParamsSerializer(serializers.Serializer):
         return repository
 
 
-class TestNameField(serializers.Field):
-    """Creates a string from different fields"""
-
-    def to_representation(self, value):
-        test = value['test']
-        suite = value['suite']
-        test_suite = suite if test == '' or test == suite else '{} {}'.format(suite, test)
-        return '{} {} {}'.format(test_suite, value['option_collection__option__name'], value['extra_options'])
-
-
 class PerformanceRevisionSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(source="platform__platform")
     values = serializers.ListField(child=serializers.DecimalField(
         rounding=decimal.ROUND_HALF_EVEN, decimal_places=2, max_digits=None, coerce_to_string=False))
-    name = TestNameField(source="*")
+    name = serializers.SerializerMethodField()
     parent_signature = serializers.CharField(source="parent_signature__signature_hash")
 
     class Meta:
         model = PerformanceSignature
         fields = ['id', 'framework_id', 'signature_hash', 'platform', 'test',
                   'lower_is_better', 'has_subtests', 'values', 'name', 'parent_signature']
+
+    def get_name(self, value):
+        test = value['test']
+        suite = value['suite']
+        test_suite = suite if test == '' or test == suite else '{} {}'.format(suite, test)
+        return '{} {} {}'.format(test_suite, value['option_collection__option__name'],
+                                 value['extra_options'])
 
 
 class PerformanceFrameworkSerializer(serializers.ModelSerializer):
